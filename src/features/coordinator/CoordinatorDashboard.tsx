@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom'
-import { IconTicket, IconClockPause, IconCircleCheck, IconUsers } from '@tabler/icons-react'
+import { IconTicket, IconClockPause, IconCircleCheck, IconUsers, IconCalendarEvent } from '@tabler/icons-react'
 import { NavBar } from '../../shared/components/NavBar'
 import { StatusBadge } from '../../design-system/components/Badge'
 import { SeverityBadge } from '../../design-system/components/Badge'
@@ -27,9 +27,14 @@ export function CoordinatorDashboard() {
       <NavBar title="Coordinateur" notifCount={kpi.attente} />
 
       <div style={{ paddingTop: '24px' }}>
-        <div style={{ marginBottom: '24px' }}>
-          <div style={{ fontSize: '18px', fontWeight: 500, color: COLORS.text.primary }}>Tableau de bord Coordinateur</div>
-          <div style={{ fontSize: '13px', color: COLORS.text.secondary, marginTop: '2px' }}>Vue globale · Gestion et approbations</div>
+        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '24px', flexWrap: 'wrap', gap: '12px' }}>
+          <div>
+            <div style={{ fontSize: '18px', fontWeight: 500, color: COLORS.text.primary }}>Tableau de bord Coordinateur</div>
+            <div style={{ fontSize: '13px', color: COLORS.text.secondary, marginTop: '2px' }}>Vue globale · Gestion et approbations</div>
+          </div>
+          <button onClick={() => navigate('/coordinator/planning')} style={{ height: '36px', background: COLORS.bg.surface, color: COLORS.brand.blue, border: `0.5px solid ${COLORS.brand.blue}`, borderRadius: '8px', fontSize: '13px', fontWeight: 500, cursor: 'pointer', padding: '0 14px', display: 'inline-flex', alignItems: 'center', gap: '6px', fontFamily: 'inherit' }}>
+            <IconCalendarEvent size={15} /> Planning de garde
+          </button>
         </div>
 
         {/* KPIs */}

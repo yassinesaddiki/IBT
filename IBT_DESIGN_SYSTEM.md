@@ -266,12 +266,56 @@ Use a normal-flow faux-viewport div (never position:fixed):
 
 | ID | Screen | Actor | Platform | Status |
 |---|---|---|---|---|
-| W-CGR-01 | Login screen | CGR | Web | ✅ Done |
-| W-CGR-02 | Main dashboard | CGR | Web | 🔄 Next |
+| W-CGR-01 | Login (unified — all roles) | All | Web | ✅ Done |
+| W-CGR-02 | CGR Dashboard | CGR | Web | ✅ Done |
+| W-CGR-03 | Pré-check Nouveau Appel | CGR | Web | ✅ Done |
+| W-CGR-04 | Nouveau Ticket — Formulaire | CGR | Web | ✅ Done |
+| W-CGR-05/06 | Détail Ticket + Rapport complet | CGR | Web | ✅ Done |
+| W-CGR-07 | Confirmation client & Clôture | CGR | Web | ✅ Done |
+| M-EEP-02 | EEP Tableau de bord | EEP | Mobile | ✅ Done |
+| M-EEP-03 | EEP Détail Ticket | EEP | Mobile | ✅ Done |
+| M-EEP-04 | EEP Mise à jour statut | EEP | Mobile | ✅ Done |
+| M-EEP-05 | EEP Rapport d'intervention | EEP | Mobile | ✅ Done |
+| M-EEP-06 | EEP Référer à SED | EEP | Mobile | ✅ Done |
+| M-SED-02 | SED Tableau de bord | SED | Mobile | ✅ Done |
+| W-CRD-02 | Coordinator Tableau de bord | Coordinator | Web | ✅ Done |
+| W-CRD-05 | Approbation EEP→SED | Coordinator | Web | ✅ Done |
+| W-OBS-02 | Observer Vue d'ensemble | Observer | Web | ✅ Done |
 
 ---
 
+## 11. Screens Remaining
 
+### 🔴 Priority — needed to complete CEO demo flows
+
+| ID | Screen | Actor | Platform |
+|---|---|---|---|
+| M-SED-03 | SED Détail Ticket (avec rapport EEP) | SED | Mobile |
+| M-SED-04 | SED Mise à jour statut | SED | Mobile |
+| M-SED-05 | SED Rapport d'intervention | SED | Mobile |
+| M-SED-06 | SED Programmer intervention | SED | Mobile |
+| W-CRD-06 | Planning de Garde (édition) | Coordinator | Web |
+| W-OBS-05 | Planning de Garde (lecture) | Observer | Web |
+
+### ⬜ Secondary — full prototype
+
+| ID | Screen | Actor | Platform |
+|---|---|---|---|
+| W-CGR-08 | Notifications | CGR | Web |
+| M-EEP-07 | Notifications | EEP | Mobile |
+| M-SED-07 | Notifications | SED | Mobile |
+| W-CRD-03 | Gestion des Tickets (liste) | Coordinator | Web |
+| W-CRD-04 | Détail Ticket (edit) | Coordinator | Web |
+| W-CRD-07 | Gestion Employés | Coordinator | Web |
+| W-CRD-08 | Gestion Secteurs | Coordinator | Web |
+| W-CRD-09 | Gestion Catégories | Coordinator | Web |
+| W-CRD-10 | Rapports & Statistiques | Coordinator | Web |
+| W-CRD-11 | Notifications | Coordinator | Web |
+| W-OBS-03 | Tickets (lecture seule) | Observer | Web |
+| W-OBS-04 | Détail Ticket | Observer | Web |
+| W-OBS-06 | Rapports | Observer | Web |
+
+---
 
 ## 12. Key Design Decisions & Rules
 

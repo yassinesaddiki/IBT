@@ -251,36 +251,58 @@ npm run type-check   # TypeScript check only
 
 Phase: MVP Prototype
 
-### Completed screens
-| ID | Screen | Route |
-|---|---|---|
-| W-CGR-01 | Login (all roles) | `/login` |
-| W-CGR-02 | CGR Dashboard | `/cgr/dashboard` |
-| W-CGR-03 | Pré-check Nouveau Appel | `/cgr/precheck` |
-| W-CGR-04 | Nouveau Ticket (formulaire) | `/cgr/nouveau-ticket` |
-| M-EEP-02 | EEP Dashboard | `/eep/dashboard` |
-| M-EEP-03 | EEP Détail Ticket | `/eep/ticket/:id` |
-| M-EEP-04 | EEP Mise à jour statut | `/eep/ticket/:id/statut` |
-| M-EEP-05 | EEP Rapport d'intervention | `/eep/ticket/:id/rapport` |
-| M-EEP-06 | EEP Référer à SED | `/eep/ticket/:id/referer` |
-| W-CRD-02 | Coordinator Dashboard | `/coordinator/dashboard` |
-| W-OBS-02 | Observer Dashboard | `/observer/dashboard` |
-| M-SED-02  | SED Dashboard (mobile) | `/sed/dashboard` |
+### ✅ Completed screens
 
-| W-CGR-05/06 | Ticket detail & rapport complet | `/cgr/ticket/:id` |
-| W-CGR-07 | Confirmation client & clôture | `/cgr/ticket/:id/cloture` |
-| W-CRD-05 | Approbation EEP→SED | `/coordinator/ticket/:id/approbation` |
+| ID | Screen | File | Route |
+|---|---|---|---|
+| W-CGR-01 | Login (unified, all roles) | `auth/LoginScreen.tsx` | `/login` |
+| W-CGR-02 | CGR Dashboard | `cgr/CGRDashboard.tsx` | `/cgr/dashboard` |
+| W-CGR-03 | Pré-check Nouveau Appel | `cgr/PreCheckScreen.tsx` | `/cgr/precheck` |
+| W-CGR-04 | Nouveau Ticket — Formulaire | `cgr/NewTicketScreen.tsx` | `/cgr/nouveau-ticket` |
+| W-CGR-05/06 | Détail Ticket + Rapport complet | `cgr/TicketDetailScreen.tsx` | `/cgr/ticket/:id` |
+| W-CGR-07 | Confirmation client & Clôture | `cgr/ClosureScreen.tsx` | `/cgr/ticket/:id/cloture` |
+| M-EEP-02 | EEP Tableau de bord | `eep/EEPDashboard.tsx` | `/eep/dashboard` |
+| M-EEP-03 | EEP Détail Ticket | `eep/EEPTicketDetail.tsx` | `/eep/ticket/:id` |
+| M-EEP-04 | EEP Mise à jour statut | `eep/EEPStatusUpdate.tsx` | `/eep/ticket/:id/statut` |
+| M-EEP-05 | EEP Rapport d'intervention | `eep/EEPInterventionReport.tsx` | `/eep/ticket/:id/rapport` |
+| M-EEP-06 | EEP Référer à SED | `eep/EEPReferToSED.tsx` | `/eep/ticket/:id/referer` |
+| M-SED-02 | SED Tableau de bord | `sed/SEDDashboard.tsx` | `/sed/dashboard` |
+| W-CRD-02 | Coordinator Tableau de bord | `coordinator/CoordinatorDashboard.tsx` | `/coordinator/dashboard` |
+| W-CRD-05 | Approbation EEP→SED | `coordinator/ApprovalScreen.tsx` | `/coordinator/ticket/:id/approbation` |
+| W-OBS-02 | Observer Vue d'ensemble | `observer/ObserverDashboard.tsx` | `/observer/dashboard` |
 
-### In progress / Next
-- W-CRD-06: Planning de garde (Coordinator) — calendar with weekly/monthly slots
-- W-OBS-05: Planning de garde (Observer, lecture seule)
-- M-SED-03 to M-SED-06: Full SED mobile flow (detail + status + report + program)
+*Note: M-EEP-01, M-SED-01, W-CRD-01, W-OBS-01 (role-specific logins) are handled by the unified `/login` — no separate screens needed.*
+
+| M-SED-03 | SED Détail Ticket (avec rapport EEP) | `sed/SEDTicketDetail.tsx` | `/sed/ticket/:id` |
+| M-SED-04 | SED Mise à jour statut | `sed/SEDStatusUpdate.tsx` | `/sed/ticket/:id/statut` |
+| M-SED-05 | SED Rapport d'intervention | `sed/SEDInterventionReport.tsx` | `/sed/ticket/:id/rapport` |
+| M-SED-06 | SED Programmer intervention | `sed/SEDScheduleScreen.tsx` | `/sed/ticket/:id/programmer` |
+| W-CRD-06 | Planning de Garde (Coordinator — édition) | `coordinator/DutyScheduleScreen.tsx` | `/coordinator/planning` |
+| W-OBS-05 | Planning de Garde (Observer — lecture) | `observer/ObserverDutySchedule.tsx` | `/observer/planning` |
+
+### ⬜ Secondary — full prototype (not needed for CEO demo)
+
+| ID | Screen |
+|---|---|
+| W-CGR-08 | CGR Notifications |
+| M-EEP-07 | EEP Notifications |
+| M-SED-07 | SED Notifications |
+| W-CRD-03 | Coordinator — Gestion des Tickets (liste complète) |
+| W-CRD-04 | Coordinator — Détail Ticket (edit) |
+| W-CRD-07 | Coordinator — Gestion Employés |
+| W-CRD-08 | Coordinator — Gestion Secteurs |
+| W-CRD-09 | Coordinator — Gestion Catégories |
+| W-CRD-10 | Coordinator — Rapports & Statistiques |
+| W-CRD-11 | Coordinator — Notifications |
+| W-OBS-03 | Observer — Tickets (lecture seule) |
+| W-OBS-04 | Observer — Détail Ticket |
+| W-OBS-06 | Observer — Rapports |
 
 ### Shared components built
-- `src/shared/components/NavBar.tsx` — desktop nav with CTA + logout
+- `src/shared/components/NavBar.tsx` — desktop nav with optional CTA + logout
 - `src/shared/components/MobileLayout.tsx` — mobile device frame for EEP/SED screens
-- `src/design-system/components/` — Button, Card, Badge, Input, Modal, Notification
-- `src/mock-data/categories.ts` — ticket categories + sub-categories
+- `src/design-system/components/` — Button, Card, Badge (Status+Severity+Role), Input, Modal, Notification
+- `src/mock-data/categories.ts` — problem categories + subcategories with default severity
 
 Reference designs are in /design-reference/ as HTML files exported from prototype sessions.
 Use them for visual reference when building each screen — match colors, layout, and labels exactly.

@@ -1,4 +1,5 @@
-import { IconEye, IconTicket, IconCircleCheck, IconUsers, IconClock } from '@tabler/icons-react'
+import { useNavigate } from 'react-router-dom'
+import { IconEye, IconTicket, IconCircleCheck, IconUsers, IconClock, IconCalendarEvent } from '@tabler/icons-react'
 import { NavBar } from '../../shared/components/NavBar'
 import { StatusBadge } from '../../design-system/components/Badge'
 import { SeverityBadge } from '../../design-system/components/Badge'
@@ -10,6 +11,7 @@ import { formatElapsed } from '../../shared/utils/formatDate'
 
 export function ObserverDashboard() {
   const { tickets } = useTickets()
+  const navigate    = useNavigate()
 
   const kpi = {
     total:   tickets.length,
@@ -30,9 +32,14 @@ export function ObserverDashboard() {
           <span style={{ fontSize: '13px', color: COLORS.semantic.info.text }}>Mode lecture seule — Aucune action disponible sur cet espace</span>
         </div>
 
-        <div style={{ marginBottom: '24px' }}>
-          <div style={{ fontSize: '18px', fontWeight: 500, color: COLORS.text.primary }}>Vue d'ensemble</div>
-          <div style={{ fontSize: '13px', color: COLORS.text.secondary, marginTop: '2px' }}>Tableau de bord en temps réel</div>
+        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '24px', flexWrap: 'wrap', gap: '12px' }}>
+          <div>
+            <div style={{ fontSize: '18px', fontWeight: 500, color: COLORS.text.primary }}>Vue d'ensemble</div>
+            <div style={{ fontSize: '13px', color: COLORS.text.secondary, marginTop: '2px' }}>Tableau de bord en temps réel</div>
+          </div>
+          <button onClick={() => navigate('/observer/planning')} style={{ height: '36px', background: COLORS.bg.surface, color: COLORS.brand.blue, border: `0.5px solid ${COLORS.brand.blue}`, borderRadius: '8px', fontSize: '13px', fontWeight: 500, cursor: 'pointer', padding: '0 14px', display: 'inline-flex', alignItems: 'center', gap: '6px', fontFamily: 'inherit' }}>
+            <IconCalendarEvent size={15} /> Planning de garde
+          </button>
         </div>
 
         {/* KPIs */}

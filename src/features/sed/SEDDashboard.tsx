@@ -1,4 +1,5 @@
-import { IconBolt, IconBell, IconAlertTriangle } from '@tabler/icons-react'
+import { useNavigate } from 'react-router-dom'
+import { IconBolt, IconBell, IconAlertTriangle, IconChevronRight } from '@tabler/icons-react'
 import { COLORS } from '../../design-system/tokens'
 import { useAuth } from '../../shared/hooks/useAuth'
 import { useTickets } from '../../shared/hooks/useTickets'
@@ -9,6 +10,7 @@ import { formatElapsed } from '../../shared/utils/formatDate'
 export function SEDDashboard() {
   const { user, logout } = useAuth()
   const { tickets }      = useTickets()
+  const navigate         = useNavigate()
 
   const sedTickets = tickets.filter((t) =>
     t.status === 'approuve-sed' || t.status === 'en-cours-sed' ||
@@ -60,7 +62,7 @@ export function SEDDashboard() {
               <div style={{ fontSize: '13px' }}>Aucun ticket SED actif</div>
             </div>
           ) : sedTickets.map((ticket) => (
-            <div key={ticket.id} className="animate-up" style={{ background: COLORS.bg.surface, borderRadius: '14px', padding: '14px', border: `0.5px solid ${COLORS.border.default}`, marginBottom: '10px' }}>
+            <div key={ticket.id} onClick={() => navigate(`/sed/ticket/${ticket.id}`)} className="animate-up" style={{ background: COLORS.bg.surface, borderRadius: '14px', padding: '14px', border: `0.5px solid ${COLORS.border.default}`, marginBottom: '10px', cursor: 'pointer' }}>
               <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '8px' }}>
                 <div>
                   <div style={{ fontSize: '11px', fontFamily: 'monospace', color: COLORS.text.secondary, marginBottom: '2px' }}>#{ticket.id}</div>
@@ -78,7 +80,10 @@ export function SEDDashboard() {
               )}
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                 <StatusBadge status={ticket.status} />
-                <span style={{ fontSize: '11px', color: COLORS.text.muted }}>{formatElapsed(ticket.createdAt)}</span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                  <span style={{ fontSize: '11px', color: COLORS.text.muted }}>{formatElapsed(ticket.createdAt)}</span>
+                  <IconChevronRight size={14} color={COLORS.text.muted} />
+                </div>
               </div>
             </div>
           ))}
