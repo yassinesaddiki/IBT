@@ -3,7 +3,7 @@ import { IconPlus, IconPencil, IconSearch, IconUserCheck, IconUserX } from '@tab
 import { NavBar } from '../../shared/components/NavBar'
 import { SubNav } from '../../shared/components/SubNav'
 import { COLORS } from '../../design-system/tokens'
-import { MOCK_EMPLOYEES, ROLE_LABELS_FR } from '../../mock-data/employees'
+import { MOCK_EMPLOYEES } from '../../mock-data/employees'
 import type { Employee, EmployeeRole } from '../../mock-data/employees'
 import { COORDINATOR_NAV } from './coordinatorNav'
 import { useTickets } from '../../shared/hooks/useTickets'

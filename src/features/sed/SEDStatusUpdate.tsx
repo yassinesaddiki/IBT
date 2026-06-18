@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { IconTool, IconPause, IconCalendar, IconCircleCheck, IconAlertTriangle } from '@tabler/icons-react'
+import { IconTool, IconPlayerPause, IconCalendar, IconCircleCheck, IconAlertTriangle } from '@tabler/icons-react'
 import { MobileLayout } from '../../shared/components/MobileLayout'
 import { SeverityBadge, StatusBadge } from '../../design-system/components/Badge'
 import { COLORS } from '../../design-system/tokens'
@@ -22,7 +22,7 @@ const ACTIONS: {
   {
     key: 'suspendu', label: 'Suspendre l\'intervention',
     desc: 'Travaux en attente (budget, permission, matériel manquant).',
-    icon: <IconPause size={18} color="#991B1B" />,
+    icon: <IconPlayerPause size={18} color="#991B1B" />,
     bg: COLORS.semantic.danger.bg, text: COLORS.semantic.danger.text, border: '#FECACA',
   },
   {

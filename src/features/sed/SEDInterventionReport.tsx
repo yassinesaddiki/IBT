@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
-import { IconCamera, IconCircleCheck, IconPause } from '@tabler/icons-react'
+import { IconCamera, IconCircleCheck, IconPlayerPause } from '@tabler/icons-react'
 import { MobileLayout } from '../../shared/components/MobileLayout'
 import { COLORS } from '../../design-system/tokens'
 import { useTicketStore } from '../../store/ticketStore'
@@ -77,7 +77,7 @@ export function SEDInterventionReport() {
               Envoi en cours…
             </>
           ) : isSuspension ? (
-            <><IconPause size={18} /> Confirmer la suspension</>
+            <><IconPlayerPause size={18} /> Confirmer la suspension</>
           ) : (
             <><IconCircleCheck size={18} /> Soumettre le rapport</>
           )}
@@ -86,7 +86,7 @@ export function SEDInterventionReport() {
     >
       {/* Status banner */}
       <div style={{ background: accentBg, border: `0.5px solid ${accentBorder}`, borderRadius: '10px', padding: '10px 12px', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-        {isSuspension ? <IconPause size={16} color={accentColor} /> : <IconCircleCheck size={16} color={accentColor} />}
+        {isSuspension ? <IconPlayerPause size={16} color={accentColor} /> : <IconCircleCheck size={16} color={accentColor} />}
         <div>
           <div style={{ fontSize: '12px', fontWeight: 500, color: accentColor }}>
             {isSuspension ? 'Suspension de l\'intervention' : 'Résolution confirmée'}

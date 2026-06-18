@@ -1,7 +1,7 @@
 import { useNavigate, useParams } from 'react-router-dom'
 import {
-  IconUser, IconMapPin, IconFileText, IconTool, IconShieldCheck,
-  IconWrenchOff, IconCircleCheck, IconPhone, IconArrowRight,
+  IconUser, IconFileText, IconTool, IconShieldCheck,
+  IconBuildingWarehouse, IconCircleCheck, IconPhone, IconArrowRight,
   IconClock, IconAlertTriangle, IconChevronRight,
 } from '@tabler/icons-react'
 import { NavBar } from '../../shared/components/NavBar'
@@ -271,7 +271,7 @@ export function TicketDetailScreen() {
 
             {/* Section F — SED Intervention */}
             {ticket.sedIntervention && (
-              <Section letter="F" title="Intervention SED" icon={<IconWrenchOff size={16} color="#7C2D12" />} iconBg="#FED7AA">
+              <Section letter="F" title="Intervention SED" icon={<IconBuildingWarehouse size={16} color="#7C2D12" />} iconBg="#FED7AA">
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '12px' }} className="info-grid-2">
                   <InfoCell label="Agent SED"    value={ticket.sedIntervention.agentName} />
                   <InfoCell label="Reçu le"      value={formatDateTime(ticket.sedIntervention.receivedAt)} />
