@@ -10,6 +10,9 @@ import { EEPInterventionReport }  from './features/eep/EEPInterventionReport'
 import { EEPReferToSED }          from './features/eep/EEPReferToSED'
 import { SEDDashboard }           from './features/sed/SEDDashboard'
 import { CoordinatorDashboard }   from './features/coordinator/CoordinatorDashboard'
+import { ApprovalScreen }         from './features/coordinator/ApprovalScreen'
+import { TicketDetailScreen }     from './features/cgr/TicketDetailScreen'
+import { ClosureScreen }          from './features/cgr/ClosureScreen'
 import { ObserverDashboard }      from './features/observer/ObserverDashboard'
 import { useAuthStore }           from './store/authStore'
 import type { UserRole }          from './shared/types/user'
@@ -28,9 +31,11 @@ export function App() {
       <Route path="/login" element={<LoginScreen />} />
 
       {/* CGR */}
-      <Route path="/cgr/dashboard"    element={<ProtectedRoute role="cgr"><CGRDashboard /></ProtectedRoute>} />
-      <Route path="/cgr/precheck"     element={<ProtectedRoute role="cgr"><PreCheckScreen /></ProtectedRoute>} />
-      <Route path="/cgr/nouveau-ticket" element={<ProtectedRoute role="cgr"><NewTicketScreen /></ProtectedRoute>} />
+      <Route path="/cgr/dashboard"        element={<ProtectedRoute role="cgr"><CGRDashboard /></ProtectedRoute>} />
+      <Route path="/cgr/precheck"         element={<ProtectedRoute role="cgr"><PreCheckScreen /></ProtectedRoute>} />
+      <Route path="/cgr/nouveau-ticket"   element={<ProtectedRoute role="cgr"><NewTicketScreen /></ProtectedRoute>} />
+      <Route path="/cgr/ticket/:id"       element={<ProtectedRoute role="cgr"><TicketDetailScreen /></ProtectedRoute>} />
+      <Route path="/cgr/ticket/:id/cloture" element={<ProtectedRoute role="cgr"><ClosureScreen /></ProtectedRoute>} />
 
       {/* EEP */}
       <Route path="/eep/dashboard"               element={<ProtectedRoute role="eep"><EEPDashboard /></ProtectedRoute>} />
@@ -44,6 +49,7 @@ export function App() {
 
       {/* Coordinator */}
       <Route path="/coordinator/dashboard" element={<ProtectedRoute role="coordinator"><CoordinatorDashboard /></ProtectedRoute>} />
+      <Route path="/coordinator/ticket/:id/approbation" element={<ProtectedRoute role="coordinator"><ApprovalScreen /></ProtectedRoute>} />
 
       {/* Observer */}
       <Route path="/observer/dashboard" element={<ProtectedRoute role="observer"><ObserverDashboard /></ProtectedRoute>} />

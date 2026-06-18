@@ -198,11 +198,11 @@ export function CGRDashboard() {
                         <td style={{ padding: '13px 8px', fontSize: '12px', color: COLORS.text.muted, whiteSpace: 'nowrap' }}>{formatElapsed(ticket.createdAt)}</td>
                         <td style={{ padding: '13px 16px' }}>
                           {(ticket.status === 'resolu-eep' || ticket.status === 'resolu-sed') ? (
-                            <button style={{ height: '28px', background: COLORS.semantic.success.bg, color: COLORS.semantic.success.text, border: `0.5px solid #BBF7D0`, borderRadius: '6px', fontSize: '12px', cursor: 'pointer', padding: '0 10px', fontFamily: 'inherit', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                            <button onClick={() => navigate(`/cgr/ticket/${ticket.id}/cloture`)} style={{ height: '28px', background: COLORS.semantic.success.bg, color: COLORS.semantic.success.text, border: `0.5px solid #BBF7D0`, borderRadius: '6px', fontSize: '12px', cursor: 'pointer', padding: '0 10px', fontFamily: 'inherit', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
                               <IconPhone size={12} /> Clore
                             </button>
                           ) : (
-                            <button style={{ height: '28px', background: COLORS.bg.surface, color: '#374151', border: `0.5px solid ${COLORS.border.strong}`, borderRadius: '6px', fontSize: '12px', cursor: 'pointer', padding: '0 10px', fontFamily: 'inherit', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                            <button onClick={() => navigate(`/cgr/ticket/${ticket.id}`)} style={{ height: '28px', background: COLORS.bg.surface, color: '#374151', border: `0.5px solid ${COLORS.border.strong}`, borderRadius: '6px', fontSize: '12px', cursor: 'pointer', padding: '0 10px', fontFamily: 'inherit', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
                               <IconEye size={12} /> Voir
                             </button>
                           )}

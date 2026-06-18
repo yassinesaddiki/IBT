@@ -267,14 +267,14 @@ Phase: MVP Prototype
 | W-OBS-02 | Observer Dashboard | `/observer/dashboard` |
 | M-SED-02  | SED Dashboard (mobile) | `/sed/dashboard` |
 
+| W-CGR-05/06 | Ticket detail & rapport complet | `/cgr/ticket/:id` |
+| W-CGR-07 | Confirmation client & clôture | `/cgr/ticket/:id/cloture` |
+| W-CRD-05 | Approbation EEP→SED | `/coordinator/ticket/:id/approbation` |
+
 ### In progress / Next
-- W-CGR-05: Détail Ticket (vue simple CGR)
-- W-CGR-06: Rapport complet ticket
-- W-CGR-07: Confirmation client / Clôture
-- W-CRD-05: Approbation EEP→SED (Coordinator)
-- W-CRD-06: Planning de garde (Coordinator)
+- W-CRD-06: Planning de garde (Coordinator) — calendar with weekly/monthly slots
 - W-OBS-05: Planning de garde (Observer, lecture seule)
-- M-SED-03 to M-SED-06: Full SED mobile flow
+- M-SED-03 to M-SED-06: Full SED mobile flow (detail + status + report + program)
 
 ### Shared components built
 - `src/shared/components/NavBar.tsx` — desktop nav with CTA + logout

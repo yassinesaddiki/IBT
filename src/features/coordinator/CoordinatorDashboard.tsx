@@ -1,3 +1,4 @@
+import { useNavigate } from 'react-router-dom'
 import { IconTicket, IconClockPause, IconCircleCheck, IconUsers } from '@tabler/icons-react'
 import { NavBar } from '../../shared/components/NavBar'
 import { StatusBadge } from '../../design-system/components/Badge'
@@ -10,6 +11,7 @@ import { formatElapsed } from '../../shared/utils/formatDate'
 
 export function CoordinatorDashboard() {
   const { tickets } = useTickets()
+  const navigate    = useNavigate()
 
   const kpi = {
     total:     tickets.length,
@@ -60,14 +62,12 @@ export function CoordinatorDashboard() {
                         <strong>Rapport EEP :</strong> {ticket.eepIntervention.actions}
                       </div>
                     )}
-                    <div style={{ display: 'flex', gap: '8px' }}>
-                      <button style={{ flex: 1, height: '36px', background: COLORS.brand.green, color: '#fff', border: 'none', borderRadius: '8px', fontSize: '13px', fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit' }}>
-                        ✓ Approuver → SED
-                      </button>
-                      <button style={{ flex: 1, height: '36px', background: COLORS.semantic.danger.bg, color: COLORS.semantic.danger.text, border: `0.5px solid #FECACA`, borderRadius: '8px', fontSize: '13px', fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit' }}>
-                        ✕ Refuser
-                      </button>
-                    </div>
+                    <button
+                      onClick={() => navigate(`/coordinator/ticket/${ticket.id}/approbation`)}
+                      style={{ width: '100%', height: '36px', background: COLORS.brand.blue, color: '#fff', border: 'none', borderRadius: '8px', fontSize: '13px', fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit' }}
+                    >
+                      Examiner et décider →
+                    </button>
                   </div>
                 ))}
               </Card>
