@@ -1,4 +1,5 @@
-import { IconBolt, IconBell, IconTicket, IconClock, IconCircleCheck } from '@tabler/icons-react'
+import { useNavigate } from 'react-router-dom'
+import { IconBolt, IconBell, IconTicket, IconClock, IconCircleCheck, IconChevronRight } from '@tabler/icons-react'
 import { COLORS } from '../../design-system/tokens'
 import { useAuth } from '../../shared/hooks/useAuth'
 import { useTickets } from '../../shared/hooks/useTickets'
@@ -9,6 +10,7 @@ import { formatElapsed } from '../../shared/utils/formatDate'
 export function EEPDashboard() {
   const { user, logout } = useAuth()
   const { tickets }      = useTickets()
+  const navigate         = useNavigate()
 
   const myTickets = tickets.filter((t) =>
     t.sector === user?.sector &&
@@ -79,7 +81,12 @@ export function EEPDashboard() {
             {myTickets.length === 0 ? (
               <div style={{ textAlign: 'center', padding: '32px', color: COLORS.text.muted, fontSize: '13px' }}>Aucun ticket actif</div>
             ) : myTickets.slice(0, 6).map((ticket) => (
-              <div key={ticket.id} className="animate-up" style={{ background: COLORS.bg.surface, borderRadius: '14px', padding: '14px', border: `0.5px solid ${COLORS.border.default}` }}>
+              <div
+                key={ticket.id}
+                className="animate-up"
+                onClick={() => navigate(`/eep/ticket/${ticket.id}`)}
+                style={{ background: COLORS.bg.surface, borderRadius: '14px', padding: '14px', border: `0.5px solid ${COLORS.border.default}`, cursor: 'pointer' }}
+              >
                 <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '8px' }}>
                   <div>
                     <div style={{ fontSize: '11px', fontFamily: 'monospace', color: COLORS.text.secondary, marginBottom: '2px' }}>#{ticket.id}</div>
@@ -91,7 +98,10 @@ export function EEPDashboard() {
                 <div style={{ fontSize: '11px', color: COLORS.text.secondary, marginBottom: '10px' }}>📍 {ticket.address}</div>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                   <StatusBadge status={ticket.status} />
-                  <span style={{ fontSize: '11px', color: COLORS.text.muted }}>{formatElapsed(ticket.createdAt)}</span>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                    <span style={{ fontSize: '11px', color: COLORS.text.muted }}>{formatElapsed(ticket.createdAt)}</span>
+                    <IconChevronRight size={14} color={COLORS.text.muted} />
+                  </div>
                 </div>
               </div>
             ))}

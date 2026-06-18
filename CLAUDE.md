@@ -250,9 +250,37 @@ npm run type-check   # TypeScript check only
 ## Current Build Status
 
 Phase: MVP Prototype
-Completed screens: none
-In progress: Core architecture setup
-Next: W-CGR-01 Login Page -> Dashboard, then full CGR flow, then EEP mobile flow
+
+### Completed screens
+| ID | Screen | Route |
+|---|---|---|
+| W-CGR-01 | Login (all roles) | `/login` |
+| W-CGR-02 | CGR Dashboard | `/cgr/dashboard` |
+| W-CGR-03 | Pré-check Nouveau Appel | `/cgr/precheck` |
+| W-CGR-04 | Nouveau Ticket (formulaire) | `/cgr/nouveau-ticket` |
+| M-EEP-02 | EEP Dashboard | `/eep/dashboard` |
+| M-EEP-03 | EEP Détail Ticket | `/eep/ticket/:id` |
+| M-EEP-04 | EEP Mise à jour statut | `/eep/ticket/:id/statut` |
+| M-EEP-05 | EEP Rapport d'intervention | `/eep/ticket/:id/rapport` |
+| M-EEP-06 | EEP Référer à SED | `/eep/ticket/:id/referer` |
+| W-CRD-02 | Coordinator Dashboard | `/coordinator/dashboard` |
+| W-OBS-02 | Observer Dashboard | `/observer/dashboard` |
+| M-SED-02  | SED Dashboard (mobile) | `/sed/dashboard` |
+
+### In progress / Next
+- W-CGR-05: Détail Ticket (vue simple CGR)
+- W-CGR-06: Rapport complet ticket
+- W-CGR-07: Confirmation client / Clôture
+- W-CRD-05: Approbation EEP→SED (Coordinator)
+- W-CRD-06: Planning de garde (Coordinator)
+- W-OBS-05: Planning de garde (Observer, lecture seule)
+- M-SED-03 to M-SED-06: Full SED mobile flow
+
+### Shared components built
+- `src/shared/components/NavBar.tsx` — desktop nav with CTA + logout
+- `src/shared/components/MobileLayout.tsx` — mobile device frame for EEP/SED screens
+- `src/design-system/components/` — Button, Card, Badge, Input, Modal, Notification
+- `src/mock-data/categories.ts` — ticket categories + sub-categories
 
 Reference designs are in /design-reference/ as HTML files exported from prototype sessions.
 Use them for visual reference when building each screen — match colors, layout, and labels exactly.

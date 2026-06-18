@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { IconTicket, IconTool, IconCircleCheck, IconClockPause, IconSearch, IconMapPin, IconAdjustmentsHorizontal, IconDownload, IconPhoneCall, IconUsersGroup, IconCalendarEvent, IconEye, IconPhone } from '@tabler/icons-react'
 import { NavBar } from '../../shared/components/NavBar'
 import { StatusBadge } from '../../design-system/components/Badge'
@@ -23,6 +24,7 @@ const FILTER_TABS: { key: FilterStatus; label: string }[] = [
 
 export function CGRDashboard() {
   const { tickets } = useTickets()
+  const navigate    = useNavigate()
   const [filter, setFilter]   = useState<FilterStatus>('tous')
   const [search, setSearch]   = useState('')
 
@@ -61,6 +63,7 @@ export function CGRDashboard() {
       <NavBar
         title="Centre de Gestion des Réclamations"
         ctaLabel="+ Nouveau Appel"
+        onCtaClick={() => navigate('/cgr/precheck')}
         notifCount={3}
       />
 
