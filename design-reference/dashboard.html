@@ -1,0 +1,772 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IBT — Tableau de bord CGR</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#F0F2F5;color:#1A1A2E;font-size:14px}
+
+  /* ── ANIMATIONS ── */
+  @keyframes up{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
+  @media(prefers-reduced-motion:no-preference){
+    .card,.kcard,.tbl-wrap{animation:up .3s ease both}
+    .kcard:nth-child(2){animation-delay:.05s}
+    .kcard:nth-child(3){animation-delay:.1s}
+    .kcard:nth-child(4){animation-delay:.15s}
+    .kcard:nth-child(5){animation-delay:.2s}
+  }
+
+  /* ── WRAP ── */
+  .wrap{max-width:1380px;margin:0 auto;padding:24px 24px 40px}
+
+  /* ── NAV ── */
+  .nav{background:#0D2B5E;height:56px;display:flex;align-items:center;
+    padding:0 24px;gap:16px;justify-content:space-between;
+    border-radius:14px 14px 0 0;position:sticky;top:0;z-index:100}
+  .nav-left{display:flex;align-items:center;gap:12px}
+  .nav-logo{width:28px;height:28px;background:#3CB97A;border-radius:7px;
+    display:flex;align-items:center;justify-content:center;flex-shrink:0}
+  .nav-brand{color:#fff;font-size:14px;font-weight:500;letter-spacing:.05em}
+  .nav-sep{color:rgba(255,255,255,.3);font-size:14px}
+  .nav-role{color:rgba(255,255,255,.6);font-size:13px}
+  .nav-right{display:flex;align-items:center;gap:16px}
+  .nav-cta{height:34px;background:#3CB97A;color:#fff;border:none;border-radius:8px;
+    font-size:13px;font-weight:500;cursor:pointer;padding:0 14px;
+    display:inline-flex;align-items:center;gap:6px;
+    font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+    text-decoration:none;transition:background .15s}
+  .nav-cta:hover{background:#33a86d}
+  .nav-bell{position:relative;cursor:pointer}
+  .nav-badge{position:absolute;top:-4px;right:-5px;width:16px;height:16px;
+    background:#EF4444;border-radius:50%;display:flex;align-items:center;
+    justify-content:center;font-size:9px;color:#fff;font-weight:500}
+  .nav-user{display:flex;align-items:center;gap:8px}
+  .nav-av{width:30px;height:30px;border-radius:50%;background:rgba(255,255,255,.15);
+    display:flex;align-items:center;justify-content:center;
+    font-size:12px;font-weight:500;color:#fff}
+  .nav-name{color:rgba(255,255,255,.8);font-size:13px}
+
+  /* ── PAGE HEADER ── */
+  .page-header{display:flex;align-items:center;justify-content:space-between;
+    margin-bottom:24px;padding-top:4px}
+  .page-title{font-size:18px;font-weight:500;color:#1A1A2E}
+  .page-sub{font-size:13px;color:#6B7280;margin-top:2px}
+  .page-date{font-size:13px;color:#6B7280;display:flex;align-items:center;gap:6px}
+
+  /* ── LAYOUT ── */
+  .layout{display:grid;grid-template-columns:1fr 300px;gap:20px;align-items:start}
+
+  /* ── KPI ROW ── */
+  .krow{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px}
+  .kcard{background:#fff;border-radius:12px;border:.5px solid #E5E7EB;padding:18px 20px;cursor:default}
+  .kcard-icon{width:36px;height:36px;border-radius:9px;display:flex;align-items:center;
+    justify-content:center;margin-bottom:12px}
+  .kcard-label{font-size:12px;color:#6B7280;margin-bottom:6px}
+  .kcard-value{font-size:28px;font-weight:500;color:#1A1A2E;line-height:1;margin-bottom:4px}
+  .kcard-trend{font-size:12px;color:#9CA3AF;display:flex;align-items:center;gap:4px}
+  .trend-up{color:#22C55E}
+  .trend-dot{width:6px;height:6px;border-radius:50%;display:inline-block;margin-right:2px}
+
+  /* ── TICKET TABLE CARD ── */
+  .tbl-wrap{background:#fff;border-radius:14px;border:.5px solid #E5E7EB;overflow:hidden;animation-delay:.1s}
+  .tbl-header{padding:16px 20px;border-bottom:.5px solid #E5E7EB;
+    display:flex;align-items:center;justify-content:space-between;gap:12px}
+  .tbl-title{font-size:15px;font-weight:500;color:#1A1A2E}
+  .tbl-controls{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .tbl-search{height:34px;border:.5px solid #D1D5DB;border-radius:8px;
+    padding:0 12px 0 32px;font-size:13px;color:#1A1A2E;background:#fff;outline:none;
+    font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;width:200px}
+  .tbl-search-wrap{position:relative}
+  .tbl-search-icon{position:absolute;left:10px;top:50%;transform:translateY(-50%);
+    color:#9CA3AF;font-size:14px;pointer-events:none}
+  .filter-btn{height:34px;background:#fff;color:#374151;border:.5px solid #D1D5DB;
+    border-radius:8px;font-size:13px;cursor:pointer;padding:0 12px;
+    font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+    display:inline-flex;align-items:center;gap:5px;transition:background .12s}
+  .filter-btn:hover{background:#F8F9FB}
+  .filter-btn.active{background:#EEF3FD;color:#1A3A72;border-color:#C5D7F5}
+
+  /* Status filter tabs */
+  .filter-tabs{padding:12px 20px;border-bottom:.5px solid #E5E7EB;
+    display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+  .ftab{height:28px;padding:0 12px;border-radius:20px;font-size:12px;font-weight:500;
+    cursor:pointer;border:.5px solid transparent;transition:all .12s;background:transparent;
+    font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}
+  .ftab:hover{background:#F0F2F5}
+  .ftab.on{background:#EEF3FD;color:#1A3A72;border-color:#C5D7F5}
+  .ftab-count{display:inline-flex;align-items:center;justify-content:center;
+    width:18px;height:18px;border-radius:50%;background:rgba(0,0,0,.07);
+    font-size:10px;margin-left:4px}
+
+  /* Table */
+  table{width:100%;border-collapse:collapse}
+  thead tr{background:#F8F9FB}
+  thead th{padding:10px 16px;font-size:11px;font-weight:500;color:#6B7280;
+    text-transform:uppercase;letter-spacing:.05em;text-align:left;white-space:nowrap}
+  tbody tr{border-bottom:.5px solid #F5F5F5;transition:background .1s;cursor:pointer}
+  tbody tr:hover{background:#F5F7FA}
+  tbody tr:last-child{border-bottom:none}
+  td{padding:13px 16px;font-size:13px;color:#374151;vertical-align:middle}
+  .td-mono{font-size:12px;font-family:'SFMono-Regular',Consolas,monospace;color:#6B7280}
+  .td-name{font-weight:500;color:#1A1A2E}
+  .td-time{font-size:12px;color:#9CA3AF;white-space:nowrap}
+  .td-addr{font-size:12px;color:#6B7280;max-width:160px;overflow:hidden;
+    text-overflow:ellipsis;white-space:nowrap}
+
+  /* ── BADGES ── */
+  .badge{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;
+    border-radius:20px;font-size:11px;font-weight:500;white-space:nowrap}
+  .badge-dot{width:5px;height:5px;border-radius:50%;flex-shrink:0}
+
+  /* Status badges */
+  .s-new{background:#EFF6FF;color:#1D4ED8;border:.5px solid #BFDBFE}
+  .s-read{background:#F0F9FF;color:#0369A1;border:.5px solid #BAE6FD}
+  .s-eep{background:#FEFCE8;color:#854D0E;border:.5px solid #FEF08A}
+  .s-refer{background:#FFF7ED;color:#C2410C;border:.5px solid #FED7AA}
+  .s-wait{background:#FFF7ED;color:#C2410C;border:.5px solid #FED7AA}
+  .s-appr{background:#FFF3E0;color:#92400E;border:.5px solid #FCD34D}
+  .s-sed{background:#FFF3E0;color:#92400E;border:.5px solid #FCD34D}
+  .s-susp{background:#FEF2F2;color:#991B1B;border:.5px solid #FECACA}
+  .s-prog{background:#F5F3FF;color:#5B21B6;border:.5px solid #DDD6FE}
+  .s-res{background:#F0FDF4;color:#166534;border:.5px solid #BBF7D0}
+  .s-close{background:#DCFCE7;color:#14532D;border:.5px solid #86EFAC}
+
+  /* Severity badges */
+  .sev-c{background:#FEF2F2;color:#991B1B;border:.5px solid #FECACA}
+  .sev-h{background:#FFF7ED;color:#C2410C;border:.5px solid #FED7AA}
+  .sev-m{background:#FEFCE8;color:#854D0E;border:.5px solid #FEF08A}
+
+  /* ── ACTION BUTTON ── */
+  .btn-view{height:28px;background:#fff;color:#374151;border:.5px solid #D1D5DB;
+    border-radius:6px;font-size:12px;cursor:pointer;padding:0 10px;
+    font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+    text-decoration:none;display:inline-flex;align-items:center;gap:4px;
+    transition:background .12s}
+  .btn-view:hover{background:#F5F7FA}
+
+  /* ── TABLE FOOTER ── */
+  .tbl-footer{padding:12px 20px;border-top:.5px solid #E5E7EB;
+    display:flex;align-items:center;justify-content:space-between}
+  .tbl-info{font-size:12px;color:#9CA3AF}
+  .tbl-pages{display:flex;align-items:center;gap:4px}
+  .pg-btn{width:28px;height:28px;border:.5px solid #D1D5DB;border-radius:6px;
+    background:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;
+    font-size:12px;color:#374151;transition:background .12s;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}
+  .pg-btn:hover{background:#F5F7FA}
+  .pg-btn.cur{background:#0D2B5E;color:#fff;border-color:#0D2B5E}
+
+  /* ── SIDEBAR ── */
+  .side{display:flex;flex-direction:column;gap:16px}
+  .s-card{background:#fff;border-radius:14px;border:.5px solid #E5E7EB;padding:18px}
+  .s-card-title{font-size:14px;font-weight:500;color:#1A1A2E;margin-bottom:14px;
+    display:flex;align-items:center;justify-content:space-between}
+  .s-card-sub{font-size:11px;color:#6B7280}
+
+  /* Duty card */
+  .sector-label{font-size:11px;font-weight:500;color:#6B7280;text-transform:uppercase;
+    letter-spacing:.05em;margin-bottom:8px;margin-top:14px}
+  .sector-label:first-child{margin-top:0}
+  .agent-row{display:flex;align-items:center;gap:10px;padding:8px;
+    background:#F8F9FB;border-radius:8px;margin-bottom:6px}
+  .agent-av{width:30px;height:30px;border-radius:50%;background:#EEF3FD;
+    display:flex;align-items:center;justify-content:center;font-size:11px;
+    font-weight:500;color:#1A3A72;flex-shrink:0}
+  .agent-name{font-size:13px;font-weight:500;color:#1A1A2E}
+  .agent-meta{font-size:11px;color:#6B7280}
+  .agent-dot{width:7px;height:7px;border-radius:50%;background:#3CB97A;flex-shrink:0}
+
+  /* Quick info card */
+  .info-row{display:flex;align-items:center;justify-content:space-between;
+    padding:10px 0;border-bottom:.5px solid #F1F3F5}
+  .info-row:last-child{border-bottom:none}
+  .info-label{font-size:12px;color:#6B7280;display:flex;align-items:center;gap:6px}
+  .info-value{font-size:13px;font-weight:500;color:#1A1A2E}
+
+  /* Precheck notice */
+  .precheck-notice{background:#EEF3FD;border:.5px solid #C5D7F5;border-radius:10px;
+    padding:12px 14px;display:flex;gap:10px;align-items:flex-start}
+  .precheck-notice i{color:#1A3A72;font-size:16px;flex-shrink:0;margin-top:1px}
+  .precheck-text{font-size:12px;color:#1A3A72;line-height:1.5}
+
+  /* Severity summary row */
+  .sev-row{display:flex;gap:8px;margin-bottom:20px}
+  .sev-pill{flex:1;background:#fff;border-radius:10px;border:.5px solid #E5E7EB;
+    padding:12px 14px;text-align:center}
+  .sev-pill-num{font-size:20px;font-weight:500;color:#1A1A2E}
+  .sev-pill-lbl{font-size:11px;color:#6B7280;margin-top:2px}
+  .sev-pill-bar{height:3px;border-radius:2px;margin-top:8px}
+
+  /* Section divider */
+  .sec-divider{display:flex;align-items:center;gap:10px;margin:4px 0 16px}
+  .sec-divider-line{flex:1;height:.5px;background:#E5E7EB}
+  .sec-divider-label{font-size:11px;font-weight:500;color:#9CA3AF;text-transform:uppercase;letter-spacing:.05em;white-space:nowrap}
+
+  /* Responsive */
+  @media(max-width:1100px){.layout{grid-template-columns:1fr}.side{display:grid;grid-template-columns:1fr 1fr;gap:16px}}
+  @media(max-width:800px){.krow{grid-template-columns:repeat(2,1fr)}.layout{grid-template-columns:1fr}.tbl-controls{flex-wrap:wrap}}
+</style>
+</head>
+<body>
+
+<!-- ═══ OUTER WRAP (nav + content) ═══ -->
+<div style="max-width:1380px;margin:0 auto;padding:20px 20px 40px">
+
+  <!-- ═══ NAV BAR ═══ -->
+  <nav class="nav">
+    <div class="nav-left">
+      <div class="nav-logo">
+        <i class="ti ti-bolt" style="color:#fff;font-size:16px" aria-hidden="true"></i>
+      </div>
+      <span class="nav-brand">IBT</span>
+      <span class="nav-sep">|</span>
+      <span class="nav-role">Centre de Gestion des Réclamations</span>
+    </div>
+    <div class="nav-right">
+      <!-- Nouveau Appel CTA → precheck.html -->
+      <a href="precheck.html" class="nav-cta" aria-label="Nouveau Appel">
+        <i class="ti ti-phone-plus" style="font-size:15px" aria-hidden="true"></i>
+        Nouveau Appel
+      </a>
+      <!-- Notifications -->
+      <a href="notifications.html" class="nav-bell" aria-label="Notifications (3 non lues)" style="color:inherit;text-decoration:none">
+        <i class="ti ti-bell" style="font-size:20px;color:rgba(255,255,255,.7)"></i>
+        <span class="nav-badge" aria-hidden="true">3</span>
+      </a>
+      <!-- User -->
+      <div class="nav-user">
+        <div class="nav-av" aria-hidden="true">SM</div>
+        <span class="nav-name">S. Moukhliss</span>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ═══ MAIN CONTENT ═══ -->
+  <div style="padding-top:24px">
+
+    <!-- PAGE HEADER -->
+    <div class="page-header">
+      <div>
+        <div class="page-title">Tableau de bord</div>
+        <div class="page-sub">Gestion des interventions Basse Tension</div>
+      </div>
+      <div class="page-date">
+        <i class="ti ti-calendar" style="font-size:15px;color:#9CA3AF" aria-hidden="true"></i>
+        Mercredi 17 juin 2026 &nbsp;·&nbsp; Semaine 25
+      </div>
+    </div>
+
+    <!-- TWO-COLUMN LAYOUT -->
+    <div class="layout">
+
+      <!-- ══ MAIN COLUMN ══ -->
+      <div>
+
+        <!-- KPI ROW -->
+        <div class="krow" role="region" aria-label="Statistiques du jour">
+          <!-- Total aujourd'hui -->
+          <div class="kcard">
+            <div class="kcard-icon" style="background:#EEF3FD">
+              <i class="ti ti-ticket" style="color:#1A3A72;font-size:18px" aria-hidden="true"></i>
+            </div>
+            <div class="kcard-label">Tickets aujourd'hui</div>
+            <div class="kcard-value">14</div>
+            <div class="kcard-trend">
+              <span class="trend-dot" style="background:#22C55E"></span>
+              <span class="trend-up">+3</span>&nbsp;vs hier
+            </div>
+          </div>
+          <!-- En cours -->
+          <div class="kcard">
+            <div class="kcard-icon" style="background:#FEFCE8">
+              <i class="ti ti-tool" style="color:#854D0E;font-size:18px" aria-hidden="true"></i>
+            </div>
+            <div class="kcard-label">En cours</div>
+            <div class="kcard-value">6</div>
+            <div class="kcard-trend">
+              <span class="trend-dot" style="background:#EAB308"></span>
+              4 EEP · 2 SED
+            </div>
+          </div>
+          <!-- Résolus -->
+          <div class="kcard">
+            <div class="kcard-icon" style="background:#F0FDF4">
+              <i class="ti ti-circle-check" style="color:#166534;font-size:18px" aria-hidden="true"></i>
+            </div>
+            <div class="kcard-label">Résolus ce jour</div>
+            <div class="kcard-value">7</div>
+            <div class="kcard-trend">
+              <span class="trend-dot" style="background:#22C55E"></span>
+              Taux&nbsp;<strong style="color:#166534">50%</strong>
+            </div>
+          </div>
+          <!-- En attente -->
+          <div class="kcard">
+            <div class="kcard-icon" style="background:#FFF7ED">
+              <i class="ti ti-clock-pause" style="color:#C2410C;font-size:18px" aria-hidden="true"></i>
+            </div>
+            <div class="kcard-label">En attente approbation</div>
+            <div class="kcard-value">1</div>
+            <div class="kcard-trend">
+              <span class="trend-dot" style="background:#F97316"></span>
+              Référé à SED
+            </div>
+          </div>
+        </div>
+
+        <!-- SEVERITY SUMMARY -->
+        <div class="sev-row" role="region" aria-label="Répartition par sévérité">
+          <div class="sev-pill">
+            <div class="sev-pill-num" style="color:#991B1B">3</div>
+            <div class="sev-pill-lbl">Critique</div>
+            <div class="sev-pill-bar" style="background:#EF4444"></div>
+          </div>
+          <div class="sev-pill">
+            <div class="sev-pill-num" style="color:#C2410C">5</div>
+            <div class="sev-pill-lbl">Haute</div>
+            <div class="sev-pill-bar" style="background:#F97316"></div>
+          </div>
+          <div class="sev-pill">
+            <div class="sev-pill-num" style="color:#854D0E">6</div>
+            <div class="sev-pill-lbl">Moyenne</div>
+            <div class="sev-pill-bar" style="background:#EAB308"></div>
+          </div>
+          <div class="sev-pill" style="flex:2;text-align:left">
+            <div style="font-size:12px;color:#6B7280;margin-bottom:6px">Durée moy. résolution</div>
+            <div style="font-size:20px;font-weight:500;color:#1A1A2E">1h 42min</div>
+            <div class="sev-pill-bar" style="background:#3CB97A"></div>
+          </div>
+        </div>
+
+        <!-- TICKET TABLE -->
+        <div class="tbl-wrap">
+          <!-- Table header / search -->
+          <div class="tbl-header">
+            <div class="tbl-title">Tickets du jour</div>
+            <div class="tbl-controls">
+              <div class="tbl-search-wrap">
+                <i class="ti ti-search tbl-search-icon" aria-hidden="true"></i>
+                <input class="tbl-search" type="search" placeholder="Nom, N° contrat, adresse…" aria-label="Rechercher un ticket">
+              </div>
+              <button class="filter-btn" aria-label="Filtrer par secteur">
+                <i class="ti ti-map-pin" style="font-size:14px" aria-hidden="true"></i>
+                Secteur
+              </button>
+              <button class="filter-btn" aria-label="Filtrer par sévérité">
+                <i class="ti ti-adjustments-horizontal" style="font-size:14px" aria-hidden="true"></i>
+                Filtres
+              </button>
+              <button class="filter-btn" aria-label="Exporter">
+                <i class="ti ti-download" style="font-size:14px" aria-hidden="true"></i>
+                Export
+              </button>
+            </div>
+          </div>
+
+          <!-- Status filter tabs -->
+          <div class="filter-tabs" role="tablist" aria-label="Filtrer par statut">
+            <button class="ftab on" role="tab" aria-selected="true">Tous <span class="ftab-count">14</span></button>
+            <button class="ftab" role="tab" aria-selected="false">Nouveau <span class="ftab-count">2</span></button>
+            <button class="ftab" role="tab" aria-selected="false">En cours EEP <span class="ftab-count">4</span></button>
+            <button class="ftab" role="tab" aria-selected="false">En cours SED <span class="ftab-count">2</span></button>
+            <button class="ftab" role="tab" aria-selected="false">Approbation <span class="ftab-count">1</span></button>
+            <button class="ftab" role="tab" aria-selected="false">Résolu <span class="ftab-count">4</span></button>
+            <button class="ftab" role="tab" aria-selected="false">Fermé <span class="ftab-count">1</span></button>
+          </div>
+
+          <!-- Table -->
+          <div style="overflow-x:auto">
+            <table aria-label="Liste des tickets">
+              <thead>
+                <tr>
+                  <th style="width:100px">N° Ticket</th>
+                  <th>Client</th>
+                  <th>Problème</th>
+                  <th style="width:90px">Sévérité</th>
+                  <th style="width:120px">Secteur</th>
+                  <th style="width:170px">Statut</th>
+                  <th style="width:80px">Durée</th>
+                  <th style="width:70px"></th>
+                </tr>
+              </thead>
+              <tbody>
+
+                <!-- Row 1 — Critique / En cours EEP -->
+                <tr>
+                  <td class="td-mono">#IBT-0058</td>
+                  <td class="td-name">Mohammed Alami</td>
+                  <td>
+                    <div style="font-size:13px;color:#374151">Fil tombé au sol</div>
+                    <div class="td-addr">12, Rue Ibn Sina, Secteur Nord</div>
+                  </td>
+                  <td><span class="badge sev-c"><span class="badge-dot" style="background:#EF4444"></span>Critique</span></td>
+                  <td style="font-size:13px;color:#6B7280">Secteur Nord</td>
+                  <td><span class="badge s-eep"><span class="badge-dot" style="background:#EAB308"></span>En cours — EEP</span></td>
+                  <td class="td-time">47 min</td>
+                  <td><a href="ticket-report.html" class="btn-view"><i class="ti ti-eye" style="font-size:13px"></i> Voir</a></td>
+                </tr>
+
+                <!-- Row 2 — Critique / Nouveau -->
+                <tr>
+                  <td class="td-mono">#IBT-0059</td>
+                  <td class="td-name">Fatima Benali</td>
+                  <td>
+                    <div style="font-size:13px;color:#374151">Incendie électrique</div>
+                    <div class="td-addr">Hay Riad, Rue 12, N°7</div>
+                  </td>
+                  <td><span class="badge sev-c"><span class="badge-dot" style="background:#EF4444"></span>Critique</span></td>
+                  <td style="font-size:13px;color:#6B7280">Secteur Est</td>
+                  <td><span class="badge s-new"><span class="badge-dot" style="background:#3B82F6"></span>Nouveau</span></td>
+                  <td class="td-time">12 min</td>
+                  <td><a href="ticket-report.html" class="btn-view"><i class="ti ti-eye" style="font-size:13px"></i> Voir</a></td>
+                </tr>
+
+                <!-- Row 3 — Haute / En attente approbation -->
+                <tr>
+                  <td class="td-mono">#IBT-0055</td>
+                  <td class="td-name">Youssef Chakir</td>
+                  <td>
+                    <div style="font-size:13px;color:#374151">Poste endommagé</div>
+                    <div class="td-addr">Av. Hassan II, résidence Al Amine</div>
+                  </td>
+                  <td><span class="badge sev-h"><span class="badge-dot" style="background:#F97316"></span>Haute</span></td>
+                  <td style="font-size:13px;color:#6B7280">Secteur Ouest</td>
+                  <td><span class="badge s-wait"><span class="badge-dot" style="background:#F97316"></span>Att. approbation</span></td>
+                  <td class="td-time">1h 58min</td>
+                  <td><a href="ticket-report.html" class="btn-view"><i class="ti ti-eye" style="font-size:13px"></i> Voir</a></td>
+                </tr>
+
+                <!-- Row 4 — Haute / En cours SED -->
+                <tr>
+                  <td class="td-mono">#IBT-0051</td>
+                  <td class="td-name">Khadija Mansouri</td>
+                  <td>
+                    <div style="font-size:13px;color:#374151">Câble souterrain endommagé</div>
+                    <div class="td-addr">Lotissement Oasis, Bloc C</div>
+                  </td>
+                  <td><span class="badge sev-h"><span class="badge-dot" style="background:#F97316"></span>Haute</span></td>
+                  <td style="font-size:13px;color:#6B7280">Secteur Sud</td>
+                  <td><span class="badge s-sed"><span class="badge-dot" style="background:#DC7609"></span>En cours — SED</span></td>
+                  <td class="td-time">3h 14min</td>
+                  <td><a href="ticket-report.html" class="btn-view"><i class="ti ti-eye" style="font-size:13px"></i> Voir</a></td>
+                </tr>
+
+                <!-- Row 5 — Moyenne / En cours EEP -->
+                <tr>
+                  <td class="td-mono">#IBT-0057</td>
+                  <td class="td-name">Omar Berrada</td>
+                  <td>
+                    <div style="font-size:13px;color:#374151">Compteur bloqué</div>
+                    <div class="td-addr">Rue Allal Ben Abdellah, N°34</div>
+                  </td>
+                  <td><span class="badge sev-m"><span class="badge-dot" style="background:#EAB308"></span>Moyenne</span></td>
+                  <td style="font-size:13px;color:#6B7280">Secteur Nord</td>
+                  <td><span class="badge s-eep"><span class="badge-dot" style="background:#EAB308"></span>En cours — EEP</span></td>
+                  <td class="td-time">1h 02min</td>
+                  <td><a href="ticket-report.html" class="btn-view"><i class="ti ti-eye" style="font-size:13px"></i> Voir</a></td>
+                </tr>
+
+                <!-- Row 6 — Haute / Lu par EEP -->
+                <tr>
+                  <td class="td-mono">#IBT-0056</td>
+                  <td class="td-name">Samira Tahiri</td>
+                  <td>
+                    <div style="font-size:13px;color:#374151">Surtension groupe d'abonnés</div>
+                    <div class="td-addr">Cité Salam, Bât. 4</div>
+                  </td>
+                  <td><span class="badge sev-h"><span class="badge-dot" style="background:#F97316"></span>Haute</span></td>
+                  <td style="font-size:13px;color:#6B7280">Secteur Est</td>
+                  <td><span class="badge s-read"><span class="badge-dot" style="background:#60A5FA"></span>Lu par EEP</span></td>
+                  <td class="td-time">1h 19min</td>
+                  <td><a href="ticket-report.html" class="btn-view"><i class="ti ti-eye" style="font-size:13px"></i> Voir</a></td>
+                </tr>
+
+                <!-- Row 7 — Critique / En cours EEP -->
+                <tr>
+                  <td class="td-mono">#IBT-0054</td>
+                  <td class="td-name">Rachid Ouhaddou</td>
+                  <td>
+                    <div style="font-size:13px;color:#374151">Poteau cassé</div>
+                    <div class="td-addr">Bd Mohammed VI, face école Arrakis</div>
+                  </td>
+                  <td><span class="badge sev-c"><span class="badge-dot" style="background:#EF4444"></span>Critique</span></td>
+                  <td style="font-size:13px;color:#6B7280">Secteur Ouest</td>
+                  <td><span class="badge s-eep"><span class="badge-dot" style="background:#EAB308"></span>En cours — EEP</span></td>
+                  <td class="td-time">2h 07min</td>
+                  <td><a href="ticket-report.html" class="btn-view"><i class="ti ti-eye" style="font-size:13px"></i> Voir</a></td>
+                </tr>
+
+                <!-- Row 8 — Moyenne / Résolu EEP -->
+                <tr>
+                  <td class="td-mono">#IBT-0050</td>
+                  <td class="td-name">Nadia Ezzine</td>
+                  <td>
+                    <div style="font-size:13px;color:#374151">Compteur endommagé</div>
+                    <div class="td-addr">Rue Moulay Rachid, N°9</div>
+                  </td>
+                  <td><span class="badge sev-m"><span class="badge-dot" style="background:#EAB308"></span>Moyenne</span></td>
+                  <td style="font-size:13px;color:#6B7280">Secteur Sud</td>
+                  <td><span class="badge s-res"><span class="badge-dot" style="background:#22C55E"></span>Résolu — EEP</span></td>
+                  <td class="td-time">0h 58min</td>
+                  <td><a href="closure.html" class="btn-view" style="background:#F0FDF4;color:#166534;border-color:#BBF7D0">
+                    <i class="ti ti-phone" style="font-size:13px"></i> Clore
+                  </a></td>
+                </tr>
+
+                <!-- Row 9 — Moyenne / Résolu SED -->
+                <tr>
+                  <td class="td-mono">#IBT-0048</td>
+                  <td class="td-name">Hassan Lahlou</td>
+                  <td>
+                    <div style="font-size:13px;color:#374151">Câble aérien endommagé</div>
+                    <div class="td-addr">Douar Lakhdar, Route nationale 6</div>
+                  </td>
+                  <td><span class="badge sev-h"><span class="badge-dot" style="background:#F97316"></span>Haute</span></td>
+                  <td style="font-size:13px;color:#6B7280">Secteur Nord</td>
+                  <td><span class="badge s-res"><span class="badge-dot" style="background:#22C55E"></span>Résolu — SED</span></td>
+                  <td class="td-time">5h 33min</td>
+                  <td><a href="closure.html" class="btn-view" style="background:#F0FDF4;color:#166534;border-color:#BBF7D0">
+                    <i class="ti ti-phone" style="font-size:13px"></i> Clore
+                  </a></td>
+                </tr>
+
+                <!-- Row 10 — Moyenne / Fermé -->
+                <tr>
+                  <td class="td-mono">#IBT-0044</td>
+                  <td class="td-name">Leila Tazi</td>
+                  <td>
+                    <div style="font-size:13px;color:#374151">Coupure client individuel</div>
+                    <div class="td-addr">Résidence Yasmine, App. 12</div>
+                  </td>
+                  <td><span class="badge sev-m"><span class="badge-dot" style="background:#EAB308"></span>Moyenne</span></td>
+                  <td style="font-size:13px;color:#6B7280">Secteur Est</td>
+                  <td><span class="badge s-close"><span class="badge-dot" style="background:#16A34A"></span>Fermé définitivement</span></td>
+                  <td class="td-time">1h 15min</td>
+                  <td><a href="ticket-report.html" class="btn-view"><i class="ti ti-eye" style="font-size:13px"></i> Voir</a></td>
+                </tr>
+
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Table footer -->
+          <div class="tbl-footer">
+            <div class="tbl-info">Affichage 1–10 sur 14 tickets</div>
+            <div class="tbl-pages" aria-label="Pagination">
+              <button class="pg-btn" aria-label="Page précédente"><i class="ti ti-chevron-left" style="font-size:13px"></i></button>
+              <button class="pg-btn cur" aria-current="page">1</button>
+              <button class="pg-btn">2</button>
+              <button class="pg-btn" aria-label="Page suivante"><i class="ti ti-chevron-right" style="font-size:13px"></i></button>
+            </div>
+          </div>
+        </div><!-- /tbl-wrap -->
+
+      </div><!-- /main column -->
+
+      <!-- ══ SIDEBAR ══ -->
+      <aside class="side">
+
+        <!-- PRE-CHECK NOTICE -->
+        <div class="precheck-notice">
+          <i class="ti ti-info-circle" aria-hidden="true"></i>
+          <div>
+            <div class="precheck-text" style="font-weight:500;margin-bottom:3px">Avant d'ouvrir un ticket</div>
+            <div class="precheck-text">Effectuez toujours la vérification MT et coupure programmée avant de créer un nouveau ticket.</div>
+            <a href="precheck.html" style="font-size:12px;color:#1A3A72;font-weight:500;
+              text-decoration:none;display:inline-flex;align-items:center;gap:4px;margin-top:6px">
+              Lancer le pré-check
+              <i class="ti ti-arrow-right" style="font-size:12px" aria-hidden="true"></i>
+            </a>
+          </div>
+        </div>
+
+        <!-- ÉQUIPE DE GARDE -->
+        <div class="s-card">
+          <div class="s-card-title">
+            <span><i class="ti ti-users-group" style="font-size:15px;margin-right:6px;color:#3CB97A" aria-hidden="true"></i>Équipe de garde</span>
+            <span class="s-card-sub">Sem. 25</span>
+          </div>
+
+          <!-- Secteur Nord -->
+          <div class="sector-label">Secteur Nord</div>
+          <div class="agent-row">
+            <div class="agent-av">KA</div>
+            <div style="flex:1">
+              <div class="agent-name">Khalid Amrani</div>
+              <div class="agent-meta">0661-234-567 · 2 tickets</div>
+            </div>
+            <span class="agent-dot" aria-label="En ligne"></span>
+          </div>
+          <div class="agent-row">
+            <div class="agent-av">MB</div>
+            <div style="flex:1">
+              <div class="agent-name">Mehdi Benali</div>
+              <div class="agent-meta">0661-345-678 · 1 ticket</div>
+            </div>
+            <span class="agent-dot" aria-label="En ligne"></span>
+          </div>
+
+          <!-- Secteur Est -->
+          <div class="sector-label">Secteur Est</div>
+          <div class="agent-row">
+            <div class="agent-av">YO</div>
+            <div style="flex:1">
+              <div class="agent-name">Yassine Ouali</div>
+              <div class="agent-meta">0662-456-789 · 3 tickets</div>
+            </div>
+            <span class="agent-dot" aria-label="En ligne"></span>
+          </div>
+          <div class="agent-row">
+            <div class="agent-av">AK</div>
+            <div style="flex:1">
+              <div class="agent-name">Amine Kabbaj</div>
+              <div class="agent-meta">0662-567-890 · 1 ticket</div>
+            </div>
+            <span class="agent-dot" aria-label="En ligne"></span>
+          </div>
+
+          <!-- Secteur Ouest -->
+          <div class="sector-label">Secteur Ouest</div>
+          <div class="agent-row">
+            <div class="agent-av">SB</div>
+            <div style="flex:1">
+              <div class="agent-name">Samir Benhima</div>
+              <div class="agent-meta">0663-678-901 · 1 ticket</div>
+            </div>
+            <span class="agent-dot" aria-label="En ligne"></span>
+          </div>
+          <div class="agent-row">
+            <div class="agent-av">RT</div>
+            <div style="flex:1">
+              <div class="agent-name">Rachid Tazi</div>
+              <div class="agent-meta">0663-789-012 · 2 tickets</div>
+            </div>
+            <span class="agent-dot" aria-label="En ligne"></span>
+          </div>
+
+          <!-- Secteur Sud -->
+          <div class="sector-label">Secteur Sud</div>
+          <div class="agent-row">
+            <div class="agent-av">NM</div>
+            <div style="flex:1">
+              <div class="agent-name">Nabil Mansouri</div>
+              <div class="agent-meta">0664-890-123 · 2 tickets</div>
+            </div>
+            <span class="agent-dot" aria-label="En ligne"></span>
+          </div>
+          <div class="agent-row">
+            <div class="agent-av">FE</div>
+            <div style="flex:1">
+              <div class="agent-name">Farid El Fassi</div>
+              <div class="agent-meta">0664-901-234 · 1 ticket</div>
+            </div>
+            <span class="agent-dot" aria-label="En ligne"></span>
+          </div>
+
+          <div style="margin-top:14px;padding-top:12px;border-top:.5px solid #F1F3F5">
+            <a href="coord-schedule.html" style="font-size:12px;color:#0D2B5E;font-weight:500;
+              text-decoration:none;display:flex;align-items:center;gap:4px">
+              <i class="ti ti-calendar-event" style="font-size:13px" aria-hidden="true"></i>
+              Voir le planning complet
+            </a>
+          </div>
+        </div><!-- /duty card -->
+
+        <!-- QUICK STATS -->
+        <div class="s-card">
+          <div class="s-card-title">Cette semaine</div>
+          <div class="info-row">
+            <div class="info-label"><i class="ti ti-ticket" style="font-size:14px;color:#9CA3AF" aria-hidden="true"></i> Total tickets</div>
+            <div class="info-value">47</div>
+          </div>
+          <div class="info-row">
+            <div class="info-label"><i class="ti ti-circle-check" style="font-size:14px;color:#3CB97A" aria-hidden="true"></i> Fermés</div>
+            <div class="info-value" style="color:#166534">38</div>
+          </div>
+          <div class="info-row">
+            <div class="info-label"><i class="ti ti-rotate" style="font-size:14px;color:#F97316" aria-hidden="true"></i> Référés SED</div>
+            <div class="info-value">6</div>
+          </div>
+          <div class="info-row">
+            <div class="info-label"><i class="ti ti-clock" style="font-size:14px;color:#9CA3AF" aria-hidden="true"></i> Durée moy.</div>
+            <div class="info-value">1h 48min</div>
+          </div>
+          <div class="info-row">
+            <div class="info-label"><i class="ti ti-mood-smile" style="font-size:14px;color:#3CB97A" aria-hidden="true"></i> Satisfaction</div>
+            <div class="info-value" style="color:#166534">94%</div>
+          </div>
+        </div>
+
+        <!-- PENDING CLOSURE — tickets résolu en attente d'appel -->
+        <div class="s-card" style="border-color:#FED7AA">
+          <div class="s-card-title" style="color:#C2410C">
+            <span><i class="ti ti-phone-call" style="font-size:15px;margin-right:6px" aria-hidden="true"></i>Appels clients en attente</span>
+            <span style="background:#FFF7ED;color:#C2410C;border:.5px solid #FED7AA;
+              font-size:11px;padding:2px 7px;border-radius:20px;font-weight:500">2</span>
+          </div>
+          <p style="font-size:12px;color:#6B7280;margin-bottom:12px;line-height:1.5">
+            Ces tickets sont résolus. Appelez les clients pour confirmer et clôturer définitivement.
+          </p>
+          <!-- Pending ticket 1 -->
+          <div style="background:#FFF7ED;border:.5px solid #FED7AA;border-radius:8px;
+            padding:10px 12px;margin-bottom:8px">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+              <span style="font-family:monospace;font-size:11px;color:#92400E">#IBT-0050</span>
+              <span class="badge sev-m" style="font-size:10px"><span class="badge-dot" style="background:#EAB308"></span>Moyenne</span>
+            </div>
+            <div style="font-size:13px;font-weight:500;color:#1A1A2E">Nadia Ezzine</div>
+            <div style="font-size:12px;color:#6B7280">Compteur endommagé · Secteur Sud</div>
+            <a href="closure.html" style="display:inline-flex;align-items:center;gap:4px;
+              margin-top:8px;font-size:12px;font-weight:500;color:#C2410C;text-decoration:none">
+              <i class="ti ti-phone" style="font-size:13px" aria-hidden="true"></i>
+              Appeler et clôturer
+            </a>
+          </div>
+          <!-- Pending ticket 2 -->
+          <div style="background:#FFF7ED;border:.5px solid #FED7AA;border-radius:8px;padding:10px 12px">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+              <span style="font-family:monospace;font-size:11px;color:#92400E">#IBT-0048</span>
+              <span class="badge sev-h" style="font-size:10px"><span class="badge-dot" style="background:#F97316"></span>Haute</span>
+            </div>
+            <div style="font-size:13px;font-weight:500;color:#1A1A2E">Hassan Lahlou</div>
+            <div style="font-size:12px;color:#6B7280">Câble aérien endommagé · Secteur Nord</div>
+            <a href="closure.html" style="display:inline-flex;align-items:center;gap:4px;
+              margin-top:8px;font-size:12px;font-weight:500;color:#C2410C;text-decoration:none">
+              <i class="ti ti-phone" style="font-size:13px" aria-hidden="true"></i>
+              Appeler et clôturer
+            </a>
+          </div>
+        </div><!-- /pending closure -->
+
+      </aside><!-- /sidebar -->
+
+    </div><!-- /layout -->
+  </div><!-- /main content -->
+</div><!-- /outer wrap -->
+
+<script>
+  // Filter tabs interaction
+  document.querySelectorAll('.ftab').forEach(function(tab){
+    tab.addEventListener('click',function(){
+      document.querySelectorAll('.ftab').forEach(function(t){
+        t.classList.remove('on');
+        t.setAttribute('aria-selected','false');
+      });
+      this.classList.add('on');
+      this.setAttribute('aria-selected','true');
+    });
+  });
+
+  // Filter button toggle
+  document.querySelectorAll('.filter-btn').forEach(function(btn){
+    btn.addEventListener('click',function(){
+      this.classList.toggle('active');
+    });
+  });
+</script>
+</body>
+</html>

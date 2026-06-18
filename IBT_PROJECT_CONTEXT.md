@@ -673,7 +673,7 @@ For each person currently on duty, the following is visible:
 ### Primary Goal
 Demonstrate to the CEO/Director that this system solves the key operational problems. Show the **main intervention circuit** with clarity.
 
-### Priority Screens for Prototype (Figma Clickable)
+### Priority Screens for Prototype
 
 #### Flow 1 — Main Happy Path (CGR → EEP → Resolved)
 1. W-CGR-03 — Pre-check screen
@@ -722,41 +722,14 @@ Demonstrate to the CEO/Director that this system solves the key operational prob
 | Ticket status | Unknown after dispatch | Tracked through all 15 statuses |
 | Client satisfaction | Not verified consistently | Mandatory client call + logged confirmation |
 
----
 
-## 15. Open Questions / Decisions Pending
 
-| # | Question | Priority | Status |
-|---|---|---|---|
-| OQ-01 | How many SED agents are there total? Do they have their own sectors/sub-teams? | High | ❓ Unanswered |
-| OQ-02 | Does SED have a team leader who assigns tasks internally? | Medium | ❓ Unanswered |
-| OQ-03 | When a ticket is set to "Programmé" by SED, does it automatically reactivate on that date? | High | ❓ Unanswered |
-| OQ-04 | Can a Coordinator reject a referral and send it back to EEP? If yes, what happens next? | High | ❓ Unanswered |
-| OQ-05 | Is there one Coordinator or multiple? If multiple, do they have sector assignments? | Medium | ❓ Unanswered |
-| OQ-06 | Who is the app's IT Admin (can create accounts, reset passwords)? Is this the Coordinator? | Medium | ❓ Unanswered |
-| OQ-07 | For the EEP mobile app, should EEP be able to see tickets from other sectors or only their own? | High | ❓ Unanswered |
-| OQ-08 | When CGR confirms with client and there's a "problème persistant", does a new ticket open? | Medium | ❓ Unanswered |
-| OQ-09 | Do EEP agents ever work alone, or always in pairs? | Low | ❓ Unanswered |
-| OQ-10 | What is the exact name/branding to display? "IBT" or full "Intervention Basse Tension"? | Low | ❓ Unanswered |
-| OQ-11 | Should the Observer be able to filter analytics by date range, sector, or category? | Medium | ❓ Unanswered |
-| OQ-12 | Is the ONEE logo available for use in the prototype? What font does ONEE use officially? | Low | ❓ Unanswered |
-
----
-
-## 16. Changelog
+## 156. Changelog
 
 | Version | Date | Author | Changes |
 |---|---|---|---|
 | 1.0 | June 2026 | Initial session | Full initial specification based on stakeholder interviews |
 
----
 
-## 🔁 How to Use This File in a New Chat
-
-Paste this file at the start of any new Claude chat and say:
-
-> *"Read this context file. This is the IBT — Intervention Basse Tension project for ONEE Morocco. We are building a Figma UI prototype. Pick up from where we left off. The current task is: [describe what you want to do next]."*
-
----
 
 *End of IBT Project Context File v1.0*

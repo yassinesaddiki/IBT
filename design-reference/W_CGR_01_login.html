@@ -1,0 +1,148 @@
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+.wrap{display:flex;min-height:600px;border-radius:12px;overflow:hidden;font-family:var(--font-sans)}
+.lp{width:40%;background:#0D2B5E;display:flex;flex-direction:column;justify-content:space-between;padding:34px;position:relative;overflow:hidden}
+.d1{position:absolute;top:-70px;right:-70px;width:260px;height:260px;border-radius:50%;border:44px solid rgba(60,185,122,0.09);pointer-events:none}
+.d2{position:absolute;bottom:-50px;left:-55px;width:190px;height:190px;border-radius:50%;border:30px solid rgba(245,197,24,0.07);pointer-events:none}
+.d3{position:absolute;top:50%;left:50%;width:380px;height:380px;border-radius:50%;border:1px solid rgba(255,255,255,0.05);transform:translate(-50%,-50%);pointer-events:none}
+.onee{display:flex;align-items:center;gap:10px}
+.onee-box{width:34px;height:34px;background:#3CB97A;border-radius:8px;display:flex;align-items:center;justify-content:center}
+.onee-name{font-size:13px;font-weight:500;color:rgba(255,255,255,0.82);letter-spacing:.1em}
+.brand-mid{flex:1;display:flex;flex-direction:column;justify-content:center;padding:18px 0}
+.ibt{font-size:66px;font-weight:500;color:#fff;letter-spacing:-2px;line-height:1;margin-bottom:12px}
+.ybar{width:50px;height:4px;background:#F5C518;border-radius:2px;margin-bottom:18px}
+.bfull{font-size:15px;font-weight:500;color:rgba(255,255,255,0.78);line-height:1.45;margin-bottom:8px}
+.bdesc{font-size:12px;color:rgba(255,255,255,0.36);line-height:1.65}
+.srow{display:flex;align-items:center;justify-content:space-between}
+.spill{display:flex;align-items:center;gap:7px;font-size:11px;color:rgba(255,255,255,0.48)}
+.sdot{width:6px;height:6px;border-radius:50%;background:#3CB97A;flex-shrink:0}
+.ver{font-size:11px;color:rgba(255,255,255,0.22);font-family:var(--font-mono)}
+.rp{flex:1;background:#F0F2F5;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:36px 26px}
+.card{background:#fff;border-radius:14px;border:.5px solid #E5E7EB;padding:36px 32px;width:100%;max-width:332px}
+@keyframes up{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@media(prefers-reduced-motion:no-preference){.card{animation:up .3s ease}}
+.rtag{display:inline-flex;align-items:center;gap:5px;background:#EEF3FD;color:#1A3A72;font-size:11px;font-weight:500;padding:4px 10px;border-radius:20px;margin-bottom:22px;border:.5px solid #C5D7F5}
+.fh{margin-bottom:24px}
+.ftitle{font-size:19px;font-weight:500;color:#1A1A2E;margin-bottom:5px}
+.fsub{font-size:13px;color:#6B7280}
+.fg{margin-bottom:16px}
+.fl{display:block;font-size:13px;font-weight:500;color:#374151;margin-bottom:6px}
+.fi{width:100%;height:42px;border:.5px solid #D1D5DB;border-radius:8px;padding:0 14px;font-size:14px;color:#1A1A2E;background:#fff;outline:none;transition:border-color .15s,box-shadow .15s;font-family:var(--font-sans)}
+.fi:focus{border-color:#0D2B5E;box-shadow:0 0 0 3px rgba(13,43,94,0.09)}
+.fi::placeholder{color:#B0B7C3}
+.pw-w{position:relative}
+.pw-w .fi{padding-right:40px}
+.pwt{position:absolute;right:11px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:#9CA3AF;display:flex;align-items:center;font-size:17px;padding:4px}
+.pwt:hover{color:#6B7280}
+.frgt{text-align:right;margin-top:5px}
+.frgt a{font-size:12px;color:#3CB97A;text-decoration:none}
+.frgt a:hover{text-decoration:underline}
+.btn{width:100%;height:44px;background:#0D2B5E;color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:500;cursor:pointer;margin-top:20px;display:flex;align-items:center;justify-content:center;gap:8px;transition:background .15s;font-family:var(--font-sans)}
+.btn:hover{background:#142f70}
+.btn:active{transform:scale(0.99)}
+.btn.ok{background:#3CB97A;cursor:default}
+.btn:disabled{cursor:default}
+.div{border:none;border-top:.5px solid #F1F3F5;margin:20px 0 16px}
+.sec{display:flex;align-items:center;justify-content:center;gap:5px;font-size:11px;color:#B0B7C3}
+.foot{margin-top:24px;font-size:11px;color:#B0B7C3;text-align:center}
+</style>
+
+<div class="wrap">
+
+  <div class="lp">
+    <div class="d1"></div>
+    <div class="d2"></div>
+    <div class="d3"></div>
+
+    <div class="onee">
+      <div class="onee-box">
+        <i class="ti ti-bolt" style="color:#fff;font-size:18px" aria-hidden="true"></i>
+      </div>
+      <span class="onee-name">ONEE</span>
+    </div>
+
+    <div class="brand-mid">
+      <div class="ibt">IBT</div>
+      <div class="ybar"></div>
+      <div class="bfull">Intervention<br>Basse Tension</div>
+      <div class="bdesc">Système de gestion<br>des interventions électriques<br>Maroc</div>
+    </div>
+
+    <div class="srow">
+      <div class="spill">
+        <span class="sdot"></span>
+        Système opérationnel
+      </div>
+      <span class="ver">v1.0</span>
+    </div>
+  </div>
+
+  <div class="rp">
+    <div class="card">
+
+      <div class="rtag">
+        <i class="ti ti-headset" style="font-size:12px" aria-hidden="true"></i>
+        CGR — Centre de Gestion des Réclamations
+      </div>
+
+      <div class="fh">
+        <div class="ftitle">Connexion</div>
+        <div class="fsub">Accédez à votre espace de gestion des interventions</div>
+      </div>
+
+      <div class="fg">
+        <label class="fl" for="uid">Identifiant</label>
+        <input class="fi" id="uid" type="text" placeholder="cgr.agent@onee.ma" autocomplete="username">
+      </div>
+
+      <div class="fg">
+        <label class="fl" for="upw">Mot de passe</label>
+        <div class="pw-w">
+          <input class="fi" id="upw" type="password" placeholder="••••••••" autocomplete="current-password">
+          <button class="pwt" onclick="togPw()" aria-label="Afficher le mot de passe">
+            <i class="ti ti-eye" id="eico"></i>
+          </button>
+        </div>
+        <div class="frgt"><a href="#">Mot de passe oublié ?</a></div>
+      </div>
+
+      <button class="btn" id="lbtn" onclick="doLogin()">
+        Se connecter
+        <i class="ti ti-arrow-right" aria-hidden="true"></i>
+      </button>
+
+      <div class="div"></div>
+
+      <div class="sec">
+        <i class="ti ti-lock" style="font-size:13px" aria-hidden="true"></i>
+        Accès réservé au personnel autorisé ONEE
+      </div>
+
+    </div>
+    <div class="foot">© 2026 ONEE · IBT Système de Gestion des Interventions</div>
+  </div>
+
+</div>
+
+<script>
+function togPw(){
+  var f=document.getElementById('upw');
+  var e=document.getElementById('eico');
+  if(f.type==='password'){f.type='text';e.className='ti ti-eye-off';}
+  else{f.type='password';e.className='ti ti-eye';}
+}
+function doLogin(){
+  var b=document.getElementById('lbtn');
+  b.innerHTML='<i class="ti ti-loader-2" style="animation:spin .7s linear infinite;font-size:16px"></i>&nbsp;Connexion en cours…';
+  b.disabled=true;
+  setTimeout(function(){
+    b.innerHTML='<i class="ti ti-check" style="font-size:16px"></i>&nbsp;Connecté — redirection…';
+    b.classList.add('ok');
+    setTimeout(function(){
+      window.location.href = "dashboard.html";
+    },900);
+  },1500);
+}
+</script>

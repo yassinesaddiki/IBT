@@ -11,6 +11,17 @@ It digitizes electricity intervention workflows that are currently paper-based.
 Language: French (primary). Arabic (secondary — add later, RTL support needed).
 Current phase: MVP prototype. No real backend yet — use mock data only.
 
+The generated output must be production-quality React code organized according to the project architecture.
+
+Every screen must:
+
+- Use reusable components
+- Use Zustand state
+- Use mock data
+- Use React Router navigation
+- Follow TypeScript strict mode
+- Be easily replaceable with API calls later
+
 ---
 
 ## Actors & Roles
@@ -239,9 +250,9 @@ npm run type-check   # TypeScript check only
 ## Current Build Status
 
 Phase: MVP Prototype
-Completed screens: W-CGR-01 (Login design reference in /design-reference/)
+Completed screens: none
 In progress: Core architecture setup
-Next: W-CGR-02 Dashboard, then full CGR flow, then EEP mobile flow
+Next: W-CGR-01 Login Page -> Dashboard, then full CGR flow, then EEP mobile flow
 
 Reference designs are in /design-reference/ as HTML files exported from prototype sessions.
 Use them for visual reference when building each screen — match colors, layout, and labels exactly.
