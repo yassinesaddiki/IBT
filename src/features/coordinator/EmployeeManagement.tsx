@@ -3,7 +3,7 @@ import { IconPlus, IconPencil, IconSearch, IconUserCheck, IconUserX } from '@tab
 import { NavBar } from '../../shared/components/NavBar'
 import { SubNav } from '../../shared/components/SubNav'
 import { COLORS } from '../../design-system/tokens'
-import { MOCK_EMPLOYEES } from '../../mock-data/employees'
+import { useEmployeeStore } from '../../store/employeeStore'
 import type { Employee, EmployeeRole } from '../../mock-data/employees'
 import { COORDINATOR_NAV } from './coordinatorNav'
 import { useTickets } from '../../shared/hooks/useTickets'
@@ -15,11 +15,11 @@ const ROLE_COLORS: Record<EmployeeRole, { bg: string; text: string; border: stri
 }
 
 export function EmployeeManagement() {
-  const { tickets } = useTickets()
-  const [employees, setEmployees] = useState(MOCK_EMPLOYEES)
-  const [search, setSearch]       = useState('')
+  const { tickets }    = useTickets()
+  const { employees, toggleStatus } = useEmployeeStore()
+  const [search, setSearch]         = useState('')
   const [roleFilter, setRoleFilter] = useState<EmployeeRole | 'tous'>('tous')
-  const [editId,  setEditId]      = useState<string | null>(null)
+  const [editId,  setEditId]        = useState<string | null>(null)
 
   const pendingApproval = tickets.filter((t) => t.status === 'attente-approbation').length
 
@@ -28,10 +28,6 @@ export function EmployeeManagement() {
     const matchSearch = !search || e.name.toLowerCase().includes(search.toLowerCase()) || e.matricule.toLowerCase().includes(search.toLowerCase())
     return matchRole && matchSearch
   })
-
-  const toggleStatus = (id: string) => {
-    setEmployees((prev) => prev.map((e) => e.id === id ? { ...e, status: e.status === 'actif' ? 'inactif' : 'actif' } : e))
-  }
 
   const stats = {
     total:  employees.length,

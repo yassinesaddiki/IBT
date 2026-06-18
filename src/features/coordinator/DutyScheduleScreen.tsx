@@ -4,8 +4,7 @@ import { NavBar } from '../../shared/components/NavBar'
 import { SubNav } from '../../shared/components/SubNav'
 import { COORDINATOR_NAV } from './coordinatorNav'
 import { COLORS } from '../../design-system/tokens'
-import { DUTY_SCHEDULE, SECTORS } from '../../mock-data/duty-schedule'
-import type { DutyAgent } from '../../mock-data/duty-schedule'
+import { useDutyStore } from '../../store/dutyStore'
 
 // Generate 4 weeks starting from current week
 function getWeeks(): { label: string; range: string; start: Date }[] {
@@ -28,32 +27,24 @@ function getWeeks(): { label: string; range: string; start: Date }[] {
   })
 }
 
-type SlotKey = string // `${sectorIdx}-${slotIdx}`
-type Schedule = Record<SlotKey, string> // agentId
 
 export function DutyScheduleScreen() {
   const weeks = getWeeks()
-  const [weekIdx,  setWeekIdx]  = useState(0)
-  const [schedule, setSchedule] = useState<Schedule>({})
-  const [saved,    setSaved]    = useState(false)
-  const [saving,   setSaving]   = useState(false)
+  const [weekIdx, setWeekIdx] = useState(0)
+  const [saved,   setSaved]   = useState(false)
+  const [saving,  setSaving]  = useState(false)
+
+  const { agents, sectors, setSlotAgent: storeSetSlot, getSlotAgent: storeGetSlot } = useDutyStore()
 
   const week = weeks[weekIdx]
 
-  const agentsBySector = (sector: string): DutyAgent[] =>
-    DUTY_SCHEDULE.filter((a) => a.sector === sector)
 
-  const getSlotAgent = (sectorIdx: number, slotIdx: number): string => {
-    const key    = `${weekIdx}-${sectorIdx}-${slotIdx}` as SlotKey
-    const id     = schedule[key]
-    if (id) return id
-    const agents = agentsBySector(SECTORS[sectorIdx])
-    return agents[slotIdx]?.id ?? ''
-  }
+
+  const getSlotAgent = (sectorIdx: number, slotIdx: number): string =>
+    storeGetSlot(weekIdx, sectorIdx, slotIdx)
 
   const setSlotAgent = (sectorIdx: number, slotIdx: number, agentId: string) => {
-    const key = `${weekIdx}-${sectorIdx}-${slotIdx}` as SlotKey
-    setSchedule((prev) => ({ ...prev, [key]: agentId }))
+    storeSetSlot(weekIdx, sectorIdx, slotIdx, agentId)
     setSaved(false)
   }
 
@@ -62,7 +53,7 @@ export function DutyScheduleScreen() {
     setTimeout(() => { setSaving(false); setSaved(true) }, 800)
   }
 
-  const hasEmpty = SECTORS.some((_, si) =>
+  const hasEmpty = sectors.map((s) => s.name).some((_, si) =>
     [0, 1].some((slot) => !getSlotAgent(si, slot))
   )
 
@@ -146,8 +137,8 @@ export function DutyScheduleScreen() {
 
         {/* Schedule grid */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '16px' }} className="schedule-grid">
-          {SECTORS.map((sector, si) => {
-            const allAgents = DUTY_SCHEDULE
+          {sectors.map((s) => s.name).map((sector, si) => {
+            const allAgents = agents
             return (
               <div
                 key={sector}
@@ -164,7 +155,7 @@ export function DutyScheduleScreen() {
                 {/* Agent slots */}
                 {[0, 1].map((slotIdx) => {
                   const currentId    = getSlotAgent(si, slotIdx)
-                  const currentAgent = DUTY_SCHEDULE.find((a) => a.id === currentId)
+                  const currentAgent = agents.find((a) => a.id === currentId)
                   const isEmpty      = !currentId
 
                   return (
@@ -227,9 +218,9 @@ export function DutyScheduleScreen() {
             <span style={{ fontSize: '14px', fontWeight: 500, color: COLORS.text.primary }}>Résumé — {week.label} ({week.range})</span>
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '12px' }} className="schedule-grid">
-            {SECTORS.map((sector, si) => {
-              const a0 = DUTY_SCHEDULE.find((a) => a.id === getSlotAgent(si, 0))
-              const a1 = DUTY_SCHEDULE.find((a) => a.id === getSlotAgent(si, 1))
+            {sectors.map((s) => s.name).map((sector, si) => {
+              const a0 = agents.find((a) => a.id === getSlotAgent(si, 0))
+              const a1 = agents.find((a) => a.id === getSlotAgent(si, 1))
               return (
                 <div key={sector} style={{ background: COLORS.bg.page, borderRadius: '10px', padding: '12px' }}>
                   <div style={{ fontSize: '11px', fontWeight: 500, color: COLORS.text.secondary, textTransform: 'uppercase', letterSpacing: '.05em', marginBottom: '8px' }}>{sector}</div>

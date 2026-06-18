@@ -50,4 +50,4 @@ export const CATEGORIES: Category[] = [
   },
 ]
 
-export const SECTORS_LIST = ['Secteur Nord', 'Secteur Est', 'Secteur Ouest', 'Secteur Sud']
+export const SECTORS_LIST = ['Oud Nachif', 'Secteur Est', 'Secteur Ouest', 'Secteur Sud']

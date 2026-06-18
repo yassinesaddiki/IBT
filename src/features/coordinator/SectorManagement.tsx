@@ -3,27 +3,13 @@ import { IconPlus, IconPencil, IconCheck, IconX } from '@tabler/icons-react'
 import { NavBar } from '../../shared/components/NavBar'
 import { SubNav } from '../../shared/components/SubNav'
 import { COLORS } from '../../design-system/tokens'
-import { DUTY_SCHEDULE } from '../../mock-data/duty-schedule'
+import { useDutyStore } from '../../store/dutyStore'
 import { COORDINATOR_NAV } from './coordinatorNav'
 import { useTickets } from '../../shared/hooks/useTickets'
 
-interface Sector {
-  id: string
-  name: string
-  status: 'actif' | 'inactif'
-  agentCount: number
-}
-
-const INITIAL_SECTORS: Sector[] = [
-  { id: 's-1', name: 'Secteur Nord',  status: 'actif', agentCount: 2 },
-  { id: 's-2', name: 'Secteur Est',   status: 'actif', agentCount: 2 },
-  { id: 's-3', name: 'Secteur Ouest', status: 'actif', agentCount: 2 },
-  { id: 's-4', name: 'Secteur Sud',   status: 'actif', agentCount: 2 },
-]
-
 export function SectorManagement() {
-  const { tickets }   = useTickets()
-  const [sectors, setSectors] = useState(INITIAL_SECTORS)
+  const { tickets }  = useTickets()
+  const { sectors, agents, addSector: storeAdd, renameSector, toggleSector } = useDutyStore()
   const [editId,  setEditId]  = useState<string | null>(null)
   const [editVal, setEditVal] = useState('')
   const [newName, setNewName] = useState('')
@@ -33,18 +19,18 @@ export function SectorManagement() {
 
   const saveEdit = (id: string) => {
     if (!editVal.trim()) return
-    setSectors((prev) => prev.map((s) => s.id === id ? { ...s, name: editVal.trim() } : s))
+    renameSector(id, editVal.trim())
     setEditId(null)
   }
 
   const addSector = () => {
     if (!newName.trim()) return
-    setSectors((prev) => [...prev, { id: `s-${Date.now()}`, name: newName.trim(), status: 'actif', agentCount: 0 }])
+    storeAdd(newName.trim())
     setNewName('')
     setShowAdd(false)
   }
 
-  const toggle = (id: string) => setSectors((prev) => prev.map((s) => s.id === id ? { ...s, status: s.status === 'actif' ? 'inactif' : 'actif' } : s))
+  const toggle = (id: string) => toggleSector(id)
 
   return (
     <div style={{ maxWidth: '1380px', margin: '0 auto', padding: '20px 20px 40px' }}>
@@ -81,7 +67,7 @@ export function SectorManagement() {
         {/* Sector cards */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
           {sectors.map((sector) => {
-            const agents       = DUTY_SCHEDULE.filter((a) => a.sector === sector.name)
+            const sectorAgents = agents.filter((a) => a.sector === sector.name)
             const sectorTickets = tickets.filter((t) => t.sector === sector.name && t.status !== 'ferme')
             const isEditing    = editId === sector.id
 
@@ -97,7 +83,7 @@ export function SectorManagement() {
                     <div style={{ flex: 1 }}>
                       <div style={{ fontSize: '15px', fontWeight: 500, color: COLORS.text.primary }}>{sector.name}</div>
                       <div style={{ fontSize: '12px', color: COLORS.text.secondary, marginTop: '2px' }}>
-                        {agents.length} agent{agents.length !== 1 ? 's' : ''} de garde · {sectorTickets.length} ticket{sectorTickets.length !== 1 ? 's' : ''} actif{sectorTickets.length !== 1 ? 's' : ''}
+                        {sectorAgents.length} agent{sectorAgents.length !== 1 ? 's' : ''} de garde · {sectorTickets.length} ticket{sectorTickets.length !== 1 ? 's' : ''} actif{sectorTickets.length !== 1 ? 's' : ''}
                       </div>
                     </div>
                   )}
@@ -127,9 +113,9 @@ export function SectorManagement() {
                   </div>
                 </div>
 
-                {agents.length > 0 && !isEditing && (
+                {sectorAgents.length > 0 && !isEditing && (
                   <div style={{ marginTop: '12px', paddingTop: '12px', borderTop: `0.5px solid #F1F3F5`, display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-                    {agents.map((a) => (
+                    {sectorAgents.map((a) => (
                       <div key={a.id} style={{ display: 'flex', alignItems: 'center', gap: '6px', background: COLORS.bg.page, padding: '4px 10px', borderRadius: '20px', border: `0.5px solid ${COLORS.border.default}` }}>
                         <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: a.online ? COLORS.brand.green : COLORS.text.muted }} />
                         <span style={{ fontSize: '12px', color: COLORS.text.primary }}>{a.name}</span>
