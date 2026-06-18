@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import { IconChevronLeft, IconChevronRight, IconUsers, IconAlertCircle, IconCheck } from '@tabler/icons-react'
 import { NavBar } from '../../shared/components/NavBar'
+import { SubNav } from '../../shared/components/SubNav'
+import { COORDINATOR_NAV } from './coordinatorNav'
 import { COLORS } from '../../design-system/tokens'
 import { DUTY_SCHEDULE, SECTORS } from '../../mock-data/duty-schedule'
 import type { DutyAgent } from '../../mock-data/duty-schedule'
@@ -66,7 +68,8 @@ export function DutyScheduleScreen() {
 
   return (
     <div style={{ maxWidth: '1380px', margin: '0 auto', padding: '20px 20px 40px' }}>
-      <NavBar title="Coordinateur" notifCount={1} />
+      <NavBar title="Coordinateur" notifCount={0} />
+      <SubNav links={COORDINATOR_NAV(0)} />
 
       <div style={{ paddingTop: '24px' }}>
 

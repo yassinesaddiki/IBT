@@ -2,6 +2,8 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { IconChevronLeft, IconChevronRight, IconPhone, IconEye } from '@tabler/icons-react'
 import { NavBar } from '../../shared/components/NavBar'
+import { SubNav } from '../../shared/components/SubNav'
+import { OBSERVER_NAV } from '../coordinator/coordinatorNav'
 import { COLORS } from '../../design-system/tokens'
 import { DUTY_SCHEDULE, SECTORS } from '../../mock-data/duty-schedule'
 
@@ -36,6 +38,7 @@ export function ObserverDutySchedule() {
   return (
     <div style={{ maxWidth: '1380px', margin: '0 auto', padding: '20px 20px 40px' }}>
       <NavBar title="Observateur — Vue Lecture Seule" />
+      <SubNav links={OBSERVER_NAV} />
 
       <div style={{ paddingTop: '24px' }}>
 

@@ -1,0 +1,97 @@
+import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { IconBell, IconBellOff, IconTicket } from '@tabler/icons-react'
+import { NavBar } from '../../shared/components/NavBar'
+import { SubNav } from '../../shared/components/SubNav'
+import { COLORS } from '../../design-system/tokens'
+import { MOCK_NOTIFICATIONS } from '../../mock-data/notifications'
+import { COORDINATOR_NAV } from './coordinatorNav'
+import { useTickets } from '../../shared/hooks/useTickets'
+
+const TYPE_STYLE = {
+  info:    { bg: COLORS.semantic.info.bg,    text: COLORS.semantic.info.text,    border: COLORS.semantic.info.border!,  dot: COLORS.brand.blue },
+  success: { bg: COLORS.semantic.success.bg, text: COLORS.semantic.success.text, border: '#BBF7D0', dot: COLORS.brand.green },
+  warning: { bg: COLORS.severity.haute.bg,   text: COLORS.severity.haute.text,   border: COLORS.severity.haute.border,  dot: '#F97316' },
+  danger:  { bg: COLORS.semantic.danger.bg,  text: COLORS.semantic.danger.text,  border: '#FECACA', dot: '#EF4444' },
+} as const
+
+export function CoordinatorNotifications() {
+  const { tickets } = useTickets()
+  const navigate    = useNavigate()
+  const coord       = MOCK_NOTIFICATIONS.filter((n) => n.roles.includes('coordinator'))
+  const [items, setItems] = useState(coord)
+  const pendingApproval   = tickets.filter((t) => t.status === 'attente-approbation').length
+  const unread            = items.filter((n) => !n.read).length
+
+  const markAllRead = () => setItems((p) => p.map((n) => ({ ...n, read: true })))
+  const markRead    = (id: string) => setItems((p) => p.map((n) => n.id === id ? { ...n, read: true } : n))
+
+  return (
+    <div style={{ maxWidth: '1380px', margin: '0 auto', padding: '20px 20px 40px' }}>
+      <NavBar title="Coordinateur" notifCount={pendingApproval} />
+      <SubNav links={COORDINATOR_NAV(pendingApproval)} />
+
+      <div style={{ paddingTop: '24px', maxWidth: '720px', margin: '0 auto' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '24px', flexWrap: 'wrap', gap: '10px' }}>
+          <div>
+            <div style={{ fontSize: '20px', fontWeight: 500, color: COLORS.text.primary, display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <IconBell size={22} color={COLORS.brand.blue} /> Notifications
+              {unread > 0 && (
+                <span style={{ background: '#EF4444', color: '#fff', fontSize: '11px', fontWeight: 500, padding: '2px 7px', borderRadius: '10px' }}>
+                  {unread} non lue{unread > 1 ? 's' : ''}
+                </span>
+              )}
+            </div>
+            <div style={{ fontSize: '13px', color: COLORS.text.secondary, marginTop: '4px' }}>Approbations, mises à jour tickets, alertes système</div>
+          </div>
+          {unread > 0 && (
+            <button onClick={markAllRead} style={{ height: '34px', background: COLORS.bg.surface, color: COLORS.text.secondary, border: `0.5px solid ${COLORS.border.strong}`, borderRadius: '8px', fontSize: '12px', cursor: 'pointer', padding: '0 14px', fontFamily: 'inherit' }}>
+              Tout marquer comme lu
+            </button>
+          )}
+        </div>
+
+        {items.length === 0 ? (
+          <div style={{ textAlign: 'center', padding: '80px 20px', color: COLORS.text.muted }}>
+            <IconBellOff size={40} style={{ marginBottom: '12px', opacity: 0.3 }} />
+            <div style={{ fontSize: '14px' }}>Aucune notification</div>
+          </div>
+        ) : (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+            {items.map((n) => {
+              const s = TYPE_STYLE[n.type]
+              const dest = n.ticketId
+                ? (n.type === 'warning' ? `/coordinator/ticket/${n.ticketId}/approbation` : `/coordinator/ticket/${n.ticketId}`)
+                : undefined
+              return (
+                <div
+                  key={n.id}
+                  onClick={() => { markRead(n.id); if (dest) navigate(dest) }}
+                  style={{ background: n.read ? COLORS.bg.surface : s.bg, border: `0.5px solid ${n.read ? COLORS.border.default : s.border}`, borderRadius: '12px', padding: '14px 16px', cursor: dest ? 'pointer' : 'default', display: 'flex', gap: '12px', alignItems: 'flex-start' }}
+                >
+                  <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: n.read ? COLORS.bg.page : s.bg, border: `0.5px solid ${n.read ? COLORS.border.default : s.border}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                    <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: n.read ? COLORS.text.muted : s.dot }} />
+                  </div>
+                  <div style={{ flex: 1 }}>
+                    <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '8px', marginBottom: '4px' }}>
+                      <span style={{ fontSize: '13px', fontWeight: n.read ? 400 : 500, color: n.read ? COLORS.text.secondary : s.text }}>{n.title}</span>
+                      <span style={{ fontSize: '11px', color: COLORS.text.muted, whiteSpace: 'nowrap' }}>{n.time}</span>
+                    </div>
+                    <div style={{ fontSize: '12px', color: COLORS.text.secondary, lineHeight: 1.6 }}>{n.message}</div>
+                    {n.ticketId && (
+                      <div style={{ marginTop: '6px', fontSize: '11px', color: COLORS.brand.blue, fontWeight: 500, display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                        <IconTicket size={12} />
+                        {n.type === 'warning' ? `Approuver le ticket ${n.ticketId}` : `Voir ${n.ticketId}`}
+                      </div>
+                    )}
+                  </div>
+                  {!n.read && <div style={{ width: '7px', height: '7px', borderRadius: '50%', background: s.dot, flexShrink: 0, marginTop: '4px' }} />}
+                </div>
+              )
+            })}
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}

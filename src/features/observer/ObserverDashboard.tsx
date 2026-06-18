@@ -1,6 +1,8 @@
 import { useNavigate } from 'react-router-dom'
 import { IconEye, IconTicket, IconCircleCheck, IconUsers, IconClock, IconCalendarEvent } from '@tabler/icons-react'
 import { NavBar } from '../../shared/components/NavBar'
+import { SubNav } from '../../shared/components/SubNav'
+import { OBSERVER_NAV } from '../coordinator/coordinatorNav'
 import { StatusBadge } from '../../design-system/components/Badge'
 import { SeverityBadge } from '../../design-system/components/Badge'
 import { Card } from '../../design-system/components/Card'
@@ -23,6 +25,7 @@ export function ObserverDashboard() {
   return (
     <div style={{ maxWidth: '1380px', margin: '0 auto', padding: '20px 20px 40px' }}>
       <NavBar title="Observateur — Vue Lecture Seule" />
+      <SubNav links={OBSERVER_NAV} />
 
       <div style={{ paddingTop: '24px' }}>
 

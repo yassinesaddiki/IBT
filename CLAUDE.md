@@ -280,23 +280,28 @@ Phase: MVP Prototype
 | W-CRD-06 | Planning de Garde (Coordinator — édition) | `coordinator/DutyScheduleScreen.tsx` | `/coordinator/planning` |
 | W-OBS-05 | Planning de Garde (Observer — lecture) | `observer/ObserverDutySchedule.tsx` | `/observer/planning` |
 
-### ⬜ Secondary — full prototype (not needed for CEO demo)
+### ✅ Secondary screens — all done (full prototype complete)
 
-| ID | Screen |
-|---|---|
-| W-CGR-08 | CGR Notifications |
-| M-EEP-07 | EEP Notifications |
-| M-SED-07 | SED Notifications |
-| W-CRD-03 | Coordinator — Gestion des Tickets (liste complète) |
-| W-CRD-04 | Coordinator — Détail Ticket (edit) |
-| W-CRD-07 | Coordinator — Gestion Employés |
-| W-CRD-08 | Coordinator — Gestion Secteurs |
-| W-CRD-09 | Coordinator — Gestion Catégories |
-| W-CRD-10 | Coordinator — Rapports & Statistiques |
-| W-CRD-11 | Coordinator — Notifications |
-| W-OBS-03 | Observer — Tickets (lecture seule) |
-| W-OBS-04 | Observer — Détail Ticket |
-| W-OBS-06 | Observer — Rapports |
+| ID | Screen | File | Route |
+|---|---|---|---|
+| W-CGR-08 | CGR Notifications | `cgr/NotificationsScreen.tsx` | `/cgr/notifications` |
+| M-EEP-07 | EEP Notifications (mobile) | `eep/EEPNotifications.tsx` | `/eep/notifications` |
+| M-SED-07 | SED Notifications (mobile) | `sed/SEDNotifications.tsx` | `/sed/notifications` |
+| W-CRD-03 | Coordinator — Gestion des Tickets | `coordinator/CoordinatorTickets.tsx` | `/coordinator/tickets` |
+| W-CRD-04 | Coordinator — Détail Ticket | *(shared TicketDetailScreen, role-aware)* | `/coordinator/ticket/:id` |
+| W-CRD-07 | Coordinator — Gestion Employés | `coordinator/EmployeeManagement.tsx` | `/coordinator/employes` |
+| W-CRD-08 | Coordinator — Gestion Secteurs | `coordinator/SectorManagement.tsx` | `/coordinator/secteurs` |
+| W-CRD-09 | Coordinator — Gestion Catégories | `coordinator/CategoryManagement.tsx` | `/coordinator/categories` |
+| W-CRD-10 | Coordinator — Rapports & Statistiques | `coordinator/ReportsScreen.tsx` | `/coordinator/rapports` |
+| W-CRD-11 | Coordinator — Notifications | `coordinator/CoordinatorNotifications.tsx` | `/coordinator/notifications` |
+| W-OBS-03 | Observer — Tickets (lecture seule) | `observer/ObserverTickets.tsx` | `/observer/tickets` |
+| W-OBS-04 | Observer — Détail Ticket | *(shared TicketDetailScreen, role-aware)* | `/observer/ticket/:id` |
+| W-OBS-06 | Observer — Rapports | `observer/ObserverReports.tsx` | `/observer/rapports` |
+
+### Shared components needed
+- `src/shared/components/SubNav.tsx` — horizontal tab nav for coordinator/observer sections
+- `src/mock-data/notifications.ts` — mock notification data (all roles)
+- `src/mock-data/employees.ts` — mock employee/agent data for management screens
 
 ### Shared components built
 - `src/shared/components/NavBar.tsx` — desktop nav with optional CTA + logout

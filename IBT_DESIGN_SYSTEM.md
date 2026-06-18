@@ -286,18 +286,18 @@ Use a normal-flow faux-viewport div (never position:fixed):
 
 ## 11. Screens Remaining
 
-### 🔴 Priority — needed to complete CEO demo flows
+### ✅ Previously missing — now done
 
-| ID | Screen | Actor | Platform |
-|---|---|---|---|
-| M-SED-03 | SED Détail Ticket (avec rapport EEP) | SED | Mobile |
-| M-SED-04 | SED Mise à jour statut | SED | Mobile |
-| M-SED-05 | SED Rapport d'intervention | SED | Mobile |
-| M-SED-06 | SED Programmer intervention | SED | Mobile |
-| W-CRD-06 | Planning de Garde (édition) | Coordinator | Web |
-| W-OBS-05 | Planning de Garde (lecture) | Observer | Web |
+| ID | Screen | Actor | Platform | Status |
+|---|---|---|---|---|
+| M-SED-03 | SED Détail Ticket (avec rapport EEP) | SED | Mobile | ✅ Done |
+| M-SED-04 | SED Mise à jour statut | SED | Mobile | ✅ Done |
+| M-SED-05 | SED Rapport d'intervention | SED | Mobile | ✅ Done |
+| M-SED-06 | SED Programmer intervention | SED | Mobile | ✅ Done |
+| W-CRD-06 | Planning de Garde (édition) | Coordinator | Web | ✅ Done |
+| W-OBS-05 | Planning de Garde (lecture) | Observer | Web | ✅ Done |
 
-### ⬜ Secondary — full prototype
+### ✅ Secondary screens — all done (full prototype complete)
 
 | ID | Screen | Actor | Platform |
 |---|---|---|---|
@@ -305,7 +305,7 @@ Use a normal-flow faux-viewport div (never position:fixed):
 | M-EEP-07 | Notifications | EEP | Mobile |
 | M-SED-07 | Notifications | SED | Mobile |
 | W-CRD-03 | Gestion des Tickets (liste) | Coordinator | Web |
-| W-CRD-04 | Détail Ticket (edit) | Coordinator | Web |
+| W-CRD-04 | Détail Ticket (role-aware) | Coordinator | Web |
 | W-CRD-07 | Gestion Employés | Coordinator | Web |
 | W-CRD-08 | Gestion Secteurs | Coordinator | Web |
 | W-CRD-09 | Gestion Catégories | Coordinator | Web |

@@ -8,9 +8,21 @@ import { NavBar } from '../../shared/components/NavBar'
 import { StatusBadge, SeverityBadge } from '../../design-system/components/Badge'
 import { COLORS } from '../../design-system/tokens'
 import { useTicketStore } from '../../store/ticketStore'
+import { useAuthStore } from '../../store/authStore'
 import { formatDateTime, formatElapsed } from '../../shared/utils/formatDate'
 import type { TicketStatus } from '../../shared/types/status'
 import { STATUS_LABELS } from '../../shared/types/status'
+
+const NAV_TITLES: Record<string, string> = {
+  cgr:         'Centre de Gestion des Réclamations',
+  coordinator: 'Coordinateur',
+  observer:    'Observateur',
+}
+const BACK_PATHS: Record<string, string> = {
+  cgr:         '/cgr/dashboard',
+  coordinator: '/coordinator/tickets',
+  observer:    '/observer/tickets',
+}
 
 const STATUS_FLOW: TicketStatus[] = [
   'nouveau', 'lu-eep', 'en-cours-eep', 'resolu-eep', 'ferme',
@@ -24,12 +36,18 @@ export function TicketDetailScreen() {
   const { id }   = useParams<{ id: string }>()
   const navigate = useNavigate()
   const tickets  = useTicketStore((s) => s.tickets)
+  const user     = useAuthStore((s) => s.user)
+  const role     = user?.role ?? 'cgr'
+  const navTitle = NAV_TITLES[role] ?? 'IBT'
+  const backPath = BACK_PATHS[role] ?? '/cgr/dashboard'
+  const canClose = role === 'cgr'
+
   const ticket   = tickets.find((t) => t.id === id)
 
   if (!ticket) {
     return (
       <div style={{ maxWidth: '1380px', margin: '0 auto', padding: '20px' }}>
-        <NavBar title="Centre de Gestion des Réclamations" notifCount={3} />
+        <NavBar title={navTitle} notifCount={3} />
         <div style={{ textAlign: 'center', padding: '80px', color: COLORS.text.muted }}>
           <IconAlertTriangle size={40} style={{ marginBottom: '12px', opacity: 0.4 }} />
           <div style={{ fontSize: '16px' }}>Ticket introuvable</div>
@@ -43,17 +61,17 @@ export function TicketDetailScreen() {
   const flow = isSEDPath ? STATUS_FLOW_SED : STATUS_FLOW
   const currentIdx = flow.indexOf(ticket.status)
 
-  const canClose = ticket.status === 'resolu-eep' || ticket.status === 'resolu-sed'
+  const showCloseBtn = canClose && (ticket.status === 'resolu-eep' || ticket.status === 'resolu-sed')
 
   return (
     <div style={{ maxWidth: '1380px', margin: '0 auto', padding: '20px 20px 40px' }}>
-      <NavBar title="Centre de Gestion des Réclamations" notifCount={3} />
+      <NavBar title={navTitle} notifCount={3} />
 
       <div style={{ paddingTop: '24px' }}>
 
         {/* Breadcrumb */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', color: COLORS.text.muted, marginBottom: '20px' }}>
-          <span onClick={() => navigate('/cgr/dashboard')} style={{ cursor: 'pointer', color: COLORS.brand.blue }}>Tableau de bord</span>
+          <span onClick={() => navigate(backPath)} style={{ cursor: 'pointer', color: COLORS.brand.blue }}>Tableau de bord</span>
           <span>›</span>
           <span style={{ color: COLORS.text.primary, fontWeight: 500, fontFamily: 'monospace' }}>#{ticket.id}</span>
         </div>
@@ -78,7 +96,7 @@ export function TicketDetailScreen() {
                 Créé le {formatDateTime(ticket.createdAt)} · {formatElapsed(ticket.createdAt)} écoulé(s)
               </div>
             </div>
-            {canClose && (
+            {showCloseBtn && (
               <button
                 onClick={() => navigate(`/cgr/ticket/${ticket.id}/cloture`)}
                 style={{
@@ -344,7 +362,7 @@ export function TicketDetailScreen() {
             </div>
 
             {/* Actions */}
-            {canClose && (
+            {showCloseBtn && (
               <div style={{ background: COLORS.semantic.success.bg, borderRadius: '14px', border: '0.5px solid #BBF7D0', padding: '18px' }}>
                 <div style={{ fontSize: '13px', fontWeight: 500, color: COLORS.semantic.success.text, marginBottom: '8px' }}>
                   ✓ Ticket résolu — Action requise
@@ -368,7 +386,7 @@ export function TicketDetailScreen() {
 
             {/* Back */}
             <button
-              onClick={() => navigate('/cgr/dashboard')}
+              onClick={() => navigate(backPath)}
               style={{
                 width: '100%', height: '36px', background: COLORS.bg.surface, color: COLORS.text.secondary,
                 border: `0.5px solid ${COLORS.border.strong}`, borderRadius: '8px', fontSize: '13px',

@@ -1,6 +1,8 @@
 import { useNavigate } from 'react-router-dom'
 import { IconTicket, IconClockPause, IconCircleCheck, IconUsers, IconCalendarEvent } from '@tabler/icons-react'
 import { NavBar } from '../../shared/components/NavBar'
+import { SubNav } from '../../shared/components/SubNav'
+import { COORDINATOR_NAV } from './coordinatorNav'
 import { StatusBadge } from '../../design-system/components/Badge'
 import { SeverityBadge } from '../../design-system/components/Badge'
 import { Card } from '../../design-system/components/Card'
@@ -25,6 +27,7 @@ export function CoordinatorDashboard() {
   return (
     <div style={{ maxWidth: '1380px', margin: '0 auto', padding: '20px 20px 40px' }}>
       <NavBar title="Coordinateur" notifCount={kpi.attente} />
+      <SubNav links={COORDINATOR_NAV(kpi.attente)} />
 
       <div style={{ paddingTop: '24px' }}>
         <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '24px', flexWrap: 'wrap', gap: '12px' }}>
