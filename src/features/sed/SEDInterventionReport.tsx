@@ -25,7 +25,7 @@ export function SEDInterventionReport() {
 
   if (!ticket) return null
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     const e: Record<string, string> = {}
     if (isSuspension && !suspensionReason.trim()) e.suspensionReason = 'Indiquez la raison de la suspension'
     if (!isSuspension && !report.trim())          e.report           = 'Décrivez les travaux effectués'
@@ -33,15 +33,17 @@ export function SEDInterventionReport() {
     if (Object.keys(e).length > 0) return
 
     setSaving(true)
-    setTimeout(() => {
+    try {
       if (isSuspension) {
-        suspendSED(ticket.id, suspensionReason)
+        await suspendSED(ticket.id, suspensionReason)
       } else {
-        resolveSED(ticket.id, { report, comments: comments || undefined })
+        await resolveSED(ticket.id, { report, comments: comments || undefined })
       }
       setDone(true)
       setTimeout(() => navigate('/sed/dashboard'), 1400)
-    }, 900)
+    } catch {
+      setSaving(false)
+    }
   }
 
   const accentColor = isSuspension ? COLORS.semantic.danger.text : COLORS.brand.green

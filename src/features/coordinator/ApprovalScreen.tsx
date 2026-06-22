@@ -8,6 +8,9 @@ import { NavBar } from '../../shared/components/NavBar'
 import { StatusBadge, SeverityBadge } from '../../design-system/components/Badge'
 import { COLORS } from '../../design-system/tokens'
 import { useTicketStore } from '../../store/ticketStore'
+import { useEmployeeByName } from '../../shared/hooks/useEmployee'
+import { EmployeeChip } from '../../shared/components/EmployeeChip'
+import { PhotoGrid } from '../../shared/components/PhotoGrid'
 import { useAuthStore } from '../../store/authStore'
 import { formatDateTime, formatElapsed } from '../../shared/utils/formatDate'
 
@@ -15,10 +18,12 @@ export function ApprovalScreen() {
   const { id }         = useParams<{ id: string }>()
   const navigate       = useNavigate()
   const tickets        = useTicketStore((s) => s.tickets)
-  const updateStatus   = useTicketStore((s) => s.updateStatus)
+  const approveTicket  = useTicketStore((s) => s.approveTicket)
+  const rejectTicket   = useTicketStore((s) => s.rejectTicket)
   const user           = useAuthStore((s) => s.user)
 
-  const ticket = tickets.find((t) => t.id === id)
+  const ticket     = tickets.find((t) => t.id === id)
+  const eepEmployee = useEmployeeByName(ticket?.eepIntervention?.agentName)
 
   const [decision,  setDecision]  = useState<'approuve' | 'refuse' | ''>('')
   const [comments,  setComments]  = useState('')
@@ -38,15 +43,23 @@ export function ApprovalScreen() {
     )
   }
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!decision) { setError('Sélectionnez une décision avant de confirmer.'); return }
+    if (decision === 'refuse' && !comments.trim()) { setError('Ajoutez un commentaire pour expliquer le refus.'); return }
     setError('')
     setSaving(true)
-    setTimeout(() => {
-      updateStatus(ticket.id, decision === 'approuve' ? 'approuve-sed' : 'en-cours-eep')
+    try {
+      if (decision === 'approuve') {
+        await approveTicket(ticket.id, user?.id ?? 'coord-1', user?.name ?? 'Coordinateur', comments || undefined)
+      } else {
+        await rejectTicket(ticket.id, user?.id ?? 'coord-1', user?.name ?? 'Coordinateur', comments)
+      }
       setDone(true)
       setTimeout(() => navigate('/coordinator/dashboard'), 1400)
-    }, 900)
+    } catch {
+      setError('Une erreur est survenue. Veuillez réessayer.')
+      setSaving(false)
+    }
   }
 
   return (
@@ -126,8 +139,8 @@ export function ApprovalScreen() {
               >
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px', marginBottom: '16px' }}>
                   <div>
-                    <div style={{ fontSize: '11px', color: COLORS.text.muted, marginBottom: '3px' }}>Agent EEP</div>
-                    <div style={{ fontSize: '13px', fontWeight: 500, color: COLORS.text.primary }}>{ticket.eepIntervention.agentName}</div>
+                    <div style={{ fontSize: '11px', color: COLORS.text.muted, marginBottom: '3px' }}>Agent Équipe de Permanance</div>
+                    <EmployeeChip empId={eepEmployee?.id} name={ticket.eepIntervention.agentName} matricule={eepEmployee?.matricule} variant="inline" />
                   </div>
                   {ticket.eepIntervention.startedAt && (
                     <div>
@@ -155,7 +168,7 @@ export function ApprovalScreen() {
                 )}
 
                 {ticket.eepIntervention.comments && (
-                  <div style={{ background: COLORS.severity.haute.bg, border: `0.5px solid ${COLORS.severity.haute.border}`, borderRadius: '10px', padding: '12px 14px' }}>
+                  <div style={{ background: COLORS.severity.haute.bg, border: `0.5px solid ${COLORS.severity.haute.border}`, borderRadius: '10px', padding: '12px 14px', marginBottom: '12px' }}>
                     <div style={{ fontSize: '11px', color: COLORS.severity.haute.text, fontWeight: 500, marginBottom: '6px' }}>
                       ⚠️ Observations / Raison du renvoi
                     </div>
@@ -164,6 +177,11 @@ export function ApprovalScreen() {
                     </div>
                   </div>
                 )}
+
+                {/* Photos from referral — key context for coordinator decision */}
+                <div style={{ marginTop: '4px' }}>
+                  <PhotoGrid photos={ticket.eepIntervention.photos ?? []} label="Photos terrain jointes par l'Équipe de Permanance" />
+                </div>
               </SectionCard>
             ) : (
               <div style={{ background: COLORS.severity.haute.bg, border: `0.5px solid ${COLORS.severity.haute.border}`, borderRadius: '12px', padding: '16px', display: 'flex', gap: '10px' }}>

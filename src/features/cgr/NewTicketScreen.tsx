@@ -69,14 +69,11 @@ export function NewTicketScreen() {
     return Object.keys(e).length === 0
   }
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!validate()) return
     setSubmitting(true)
-    setTimeout(() => {
-      const now = new Date()
-      const ticketId = `IBT-${now.getFullYear().toString().slice(2)}${String(now.getMonth() + 1).padStart(2,'0')}-${String(Math.floor(Math.random() * 900) + 100)}`
-      addTicket({
-        id:                ticketId,
+    try {
+      await addTicket({
         clientName,
         contractNumber,
         phone,
@@ -87,14 +84,16 @@ export function NewTicketScreen() {
         severity:          severity as Severity,
         description:       description || undefined,
         status:            'nouveau',
-        createdAt:         now,
         createdBy:         user?.id ?? 'cgr-1',
         preCheckMT:        true,
         preCheckProgramme: true,
       })
       setDone(true)
       setTimeout(() => navigate('/cgr/dashboard'), 1500)
-    }, 1000)
+    } catch (err) {
+      console.error(err)
+      setSubmitting(false)
+    }
   }
 
   return (

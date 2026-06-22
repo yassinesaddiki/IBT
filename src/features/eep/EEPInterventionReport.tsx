@@ -21,18 +21,20 @@ export function EEPInterventionReport() {
 
   if (!ticket) return null
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     const e: Record<string, string> = {}
     if (!actions.trim()) e.actions = 'Décrivez les actions effectuées'
     setErrors(e)
     if (Object.keys(e).length > 0) return
 
     setSaving(true)
-    setTimeout(() => {
-      resolveEEP(ticket.id, { actions, comments: comments || undefined })
+    try {
+      await resolveEEP(ticket.id, { actions, comments: comments || undefined })
       setDone(true)
       setTimeout(() => navigate('/eep/dashboard'), 1400)
-    }, 900)
+    } catch {
+      setSaving(false)
+    }
   }
 
   return (

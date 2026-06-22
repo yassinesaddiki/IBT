@@ -96,7 +96,7 @@ export function LoginScreen() {
             transform: 'translate(-50%,-50%)', pointerEvents: 'none',
           }} />
 
-          {/* ONEE logo */}
+          {/* SRM ORI logo */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px', position: 'relative' }}>
             <div style={{
               width: '34px', height: '34px', background: COLORS.brand.green,
@@ -105,7 +105,7 @@ export function LoginScreen() {
               <IconBolt size={18} color="#fff" />
             </div>
             <span style={{ fontSize: '13px', fontWeight: 500, color: 'rgba(255,255,255,0.82)', letterSpacing: '.1em' }}>
-              ONEE
+              SRM ORI
             </span>
           </div>
 
@@ -164,7 +164,7 @@ export function LoginScreen() {
               border: `0.5px solid ${COLORS.semantic.info.border}`,
             }}>
               <IconBolt size={12} />
-              IBT · Accès personnel ONEE
+              IBT · Accès personnel SRM ORI
             </div>
 
             {/* Heading */}
@@ -271,12 +271,12 @@ export function LoginScreen() {
             {/* Security notice */}
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '5px', fontSize: '11px', color: COLORS.text.placeholder }}>
               <IconLock size={13} />
-              Accès réservé au personnel autorisé ONEE
+              Accès réservé au personnel autorisé SRM ORI
             </div>
           </div>
 
           <div style={{ marginTop: '24px', fontSize: '11px', color: COLORS.text.placeholder, textAlign: 'center' }}>
-            © 2026 ONEE · IBT Système de Gestion des Interventions
+            © 2026 SRM ORI · IBT Système de Gestion des Interventions
           </div>
         </div>
       </div>

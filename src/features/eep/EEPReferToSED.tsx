@@ -1,10 +1,11 @@
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { IconArrowRight, IconCircleCheck, IconAlertTriangle } from '@tabler/icons-react'
+import { IconArrowRight, IconCircleCheck, IconAlertTriangle, IconCamera, IconX } from '@tabler/icons-react'
 import { MobileLayout } from '../../shared/components/MobileLayout'
 import { SeverityBadge } from '../../design-system/components/Badge'
 import { COLORS } from '../../design-system/tokens'
 import { useTicketStore } from '../../store/ticketStore'
+import { uploadMultiple } from '../../shared/hooks/useStorageUpload'
 
 const REFER_REASONS = [
   'Nécessite équipement lourd (pick-up, grue)',
@@ -26,13 +27,32 @@ export function EEPReferToSED() {
   const [selectedReason, setSelectedReason] = useState('')
   const [actions,        setActions]         = useState('')
   const [comments,       setComments]        = useState('')
+  const [photos,         setPhotos]          = useState<File[]>([])
+  const [previews,       setPreviews]        = useState<string[]>([])
   const [saving,         setSaving]          = useState(false)
   const [done,           setDone]            = useState(false)
   const [errors,         setErrors]          = useState<Record<string, string>>({})
+  const fileInputRef = useRef<HTMLInputElement>(null)
+
+  const handlePhotoAdd = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files ?? []).slice(0, 5 - photos.length)
+    if (!files.length) return
+    setPhotos((p) => [...p, ...files])
+    files.forEach((f) => {
+      const url = URL.createObjectURL(f)
+      setPreviews((p) => [...p, url])
+    })
+    e.target.value = ''
+  }
+
+  const removePhoto = (i: number) => {
+    setPhotos((p) => p.filter((_, idx) => idx !== i))
+    setPreviews((p) => p.filter((_, idx) => idx !== i))
+  }
 
   if (!ticket) return null
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     const e: Record<string, string> = {}
     if (!selectedReason) e.reason  = 'Sélectionnez une raison'
     if (!actions.trim()) e.actions = 'Décrivez ce qui a été fait'
@@ -40,14 +60,20 @@ export function EEPReferToSED() {
     if (Object.keys(e).length > 0) return
 
     setSaving(true)
-    setTimeout(() => {
-      referToSED(ticket.id, {
+    try {
+      const uploadedPaths = photos.length
+        ? await uploadMultiple('ticket-photos', photos, `${ticket.id}/eep-refer`)
+        : []
+      await referToSED(ticket.id, {
         actions,
         comments: [selectedReason, comments].filter(Boolean).join(' — ') || undefined,
+        photos:   uploadedPaths,
       })
       setDone(true)
       setTimeout(() => navigate('/eep/dashboard'), 1400)
-    }, 900)
+    } catch {
+      setSaving(false)
+    }
   }
 
   return (
@@ -154,7 +180,7 @@ export function EEPReferToSED() {
       </div>
 
       {/* Additional notes */}
-      <div style={{ marginBottom: '8px' }}>
+      <div style={{ marginBottom: '16px' }}>
         <label style={{ display: 'block', fontSize: '13px', fontWeight: 500, color: '#374151', marginBottom: '6px' }}>
           Notes pour l'équipe SED (optionnel)
         </label>
@@ -170,6 +196,32 @@ export function EEPReferToSED() {
             outline: 'none', resize: 'none', fontFamily: 'inherit', lineHeight: 1.6,
           }}
         />
+      </div>
+
+      {/* Photos */}
+      <div style={{ marginBottom: '8px' }}>
+        <label style={{ display: 'block', fontSize: '13px', fontWeight: 500, color: '#374151', marginBottom: '8px' }}>
+          Photos du terrain <span style={{ color: COLORS.text.muted, fontWeight: 400 }}>(optionnel, max 5)</span>
+        </label>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px', marginBottom: '8px' }}>
+          {previews.map((src, i) => (
+            <div key={i} style={{ position: 'relative', aspectRatio: '1', borderRadius: '10px', overflow: 'hidden', border: `0.5px solid ${COLORS.border.default}` }}>
+              <img src={src} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              <button onClick={() => removePhoto(i)}
+                style={{ position: 'absolute', top: '4px', right: '4px', width: '20px', height: '20px', borderRadius: '50%', background: 'rgba(0,0,0,0.6)', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <IconX size={11} color="#fff" />
+              </button>
+            </div>
+          ))}
+          {photos.length < 5 && (
+            <button onClick={() => fileInputRef.current?.click()}
+              style={{ aspectRatio: '1', borderRadius: '10px', border: `1.5px dashed ${COLORS.border.strong}`, background: COLORS.bg.page, cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '4px' }}>
+              <IconCamera size={20} color={COLORS.text.muted} />
+              <span style={{ fontSize: '10px', color: COLORS.text.muted }}>Ajouter</span>
+            </button>
+          )}
+        </div>
+        <input ref={fileInputRef} type="file" accept="image/*" multiple onChange={handlePhotoAdd} style={{ display: 'none' }} />
       </div>
     </MobileLayout>
   )

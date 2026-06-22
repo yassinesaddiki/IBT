@@ -39,6 +39,8 @@ import { ObserverDashboard }      from './features/observer/ObserverDashboard'
 import { ObserverDutySchedule }   from './features/observer/ObserverDutySchedule'
 import { ObserverTickets }        from './features/observer/ObserverTickets'
 import { ObserverReports }        from './features/observer/ObserverReports'
+// Shared
+import { EmployeeProfile }        from './features/shared/EmployeeProfile'
 // Store
 import { useAuthStore }           from './store/authStore'
 import type { UserRole }          from './shared/types/user'
@@ -50,11 +52,19 @@ function ProtectedRoute({ role, children }: { role: UserRole; children: React.Re
   return <>{children}</>
 }
 
+function AnyAuthRoute({ children }: { children: React.ReactNode }) {
+  const user = useAuthStore((s) => s.user)
+  if (!user) return <Navigate to="/login" replace />
+  return <>{children}</>
+}
+
 export function App() {
   return (
     <Routes>
       <Route path="/"      element={<Navigate to="/login" replace />} />
       <Route path="/login" element={<LoginScreen />} />
+      {/* Employee profile — accessible by any authenticated user */}
+      <Route path="/employee/:id" element={<AnyAuthRoute><EmployeeProfile /></AnyAuthRoute>} />
 
       {/* ── CGR ── */}
       <Route path="/cgr/dashboard"              element={<ProtectedRoute role="cgr"><CGRDashboard /></ProtectedRoute>} />

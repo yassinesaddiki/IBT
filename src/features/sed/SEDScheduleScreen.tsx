@@ -36,7 +36,7 @@ export function SEDScheduleScreen() {
 
   if (!ticket) return null
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     const e: Record<string, string> = {}
     if (!date)   e.date   = 'Sélectionnez une date'
     if (!reason) e.reason = 'Sélectionnez une raison'
@@ -44,11 +44,13 @@ export function SEDScheduleScreen() {
     if (Object.keys(e).length > 0) return
 
     setSaving(true)
-    setTimeout(() => {
-      scheduleSED(ticket.id, new Date(date), [reason, notes].filter(Boolean).join(' — '))
+    try {
+      await scheduleSED(ticket.id, new Date(date), [reason, notes].filter(Boolean).join(' — '))
       setDone(true)
       setTimeout(() => navigate('/sed/dashboard'), 1400)
-    }, 900)
+    } catch {
+      setSaving(false)
+    }
   }
 
   return (

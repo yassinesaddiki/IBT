@@ -6,6 +6,8 @@ import { SubNav } from '../../shared/components/SubNav'
 import { OBSERVER_NAV } from '../coordinator/coordinatorNav'
 import { COLORS } from '../../design-system/tokens'
 import { useDutyStore } from '../../store/dutyStore'
+import { useEmployeeStore } from '../../store/employeeStore'
+import { EmployeeChip } from '../../shared/components/EmployeeChip'
 
 function getWeeks(): { label: string; range: string; weekNum: number }[] {
   const today = new Date()
@@ -34,6 +36,7 @@ export function ObserverDutySchedule() {
   const week       = weeks[weekIdx]
   const dutyAgents = useDutyStore((s) => s.agents)
   const sectors    = useDutyStore((s) => s.sectors).filter((s) => s.status === 'actif')
+  const employees  = useEmployeeStore((s) => s.employees)
 
   const onlineCount = dutyAgents.filter((a) => a.online).length
 
@@ -121,13 +124,15 @@ export function ObserverDutySchedule() {
                   <span style={{ marginLeft: 'auto', fontSize: '11px', color: COLORS.text.muted }}>{week.label}</span>
                 </div>
 
-                {agents.map((agent) => (
+                {agents.map((agent) => {
+                  const emp = employees.find((e) => e.name === agent.name)
+                  return (
                   <div key={agent.id} style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '10px', background: COLORS.bg.page, borderRadius: '10px', marginBottom: '10px' }}>
                     <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: COLORS.semantic.info.bg, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', fontWeight: 500, color: COLORS.semantic.info.text, flexShrink: 0 }}>
                       {agent.initials}
                     </div>
                     <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{ fontSize: '13px', fontWeight: 500, color: COLORS.text.primary }}>{agent.name}</div>
+                      <EmployeeChip empId={emp?.id} name={agent.name} matricule={emp?.matricule} variant="block" />
                       <div style={{ fontSize: '11px', color: COLORS.text.secondary, marginTop: '2px' }}>
                         {agent.activeTickets} ticket{agent.activeTickets !== 1 ? 's' : ''} actif{agent.activeTickets !== 1 ? 's' : ''} · {agent.closedThisWeek} fermés cette semaine
                       </div>
@@ -142,7 +147,7 @@ export function ObserverDutySchedule() {
                       </a>
                     </div>
                   </div>
-                ))}
+                )})}
               </div>
             )
           })}
@@ -163,14 +168,16 @@ export function ObserverDutySchedule() {
                 </tr>
               </thead>
               <tbody>
-                {dutyAgents.map((agent) => (
+                {dutyAgents.map((agent) => {
+                  const emp = employees.find((e) => e.name === agent.name)
+                  return (
                   <tr key={agent.id} style={{ borderBottom: `0.5px solid #F5F5F5` }}>
                     <td style={{ padding: '12px 14px' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                         <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: COLORS.semantic.info.bg, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '11px', fontWeight: 500, color: COLORS.semantic.info.text, flexShrink: 0 }}>
                           {agent.initials}
                         </div>
-                        <span style={{ fontSize: '13px', fontWeight: 500, color: COLORS.text.primary }}>{agent.name}</span>
+                        <EmployeeChip empId={emp?.id} name={agent.name} matricule={emp?.matricule} variant="block" />
                       </div>
                     </td>
                     <td style={{ padding: '12px 8px', fontSize: '13px', color: COLORS.text.secondary }}>{agent.sector}</td>
@@ -186,7 +193,7 @@ export function ObserverDutySchedule() {
                       </span>
                     </td>
                   </tr>
-                ))}
+                )})}
               </tbody>
             </table>
           </div>

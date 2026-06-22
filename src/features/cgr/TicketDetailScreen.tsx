@@ -9,6 +9,9 @@ import { StatusBadge, SeverityBadge } from '../../design-system/components/Badge
 import { COLORS } from '../../design-system/tokens'
 import { useTicketStore } from '../../store/ticketStore'
 import { useAuthStore } from '../../store/authStore'
+import { useEmployeeByName } from '../../shared/hooks/useEmployee'
+import { EmployeeChip } from '../../shared/components/EmployeeChip'
+import { PhotoGrid } from '../../shared/components/PhotoGrid'
 import { formatDateTime, formatElapsed } from '../../shared/utils/formatDate'
 import type { TicketStatus } from '../../shared/types/status'
 import { STATUS_LABELS } from '../../shared/types/status'
@@ -42,7 +45,9 @@ export function TicketDetailScreen() {
   const backPath = BACK_PATHS[role] ?? '/cgr/dashboard'
   const canClose = role === 'cgr'
 
-  const ticket   = tickets.find((t) => t.id === id)
+  const ticket     = tickets.find((t) => t.id === id)
+  const eepEmployee = useEmployeeByName(ticket?.eepIntervention?.agentName)
+  const sedEmployee = useEmployeeByName(ticket?.sedIntervention?.agentName)
 
   if (!ticket) {
     return (
@@ -191,7 +196,9 @@ export function TicketDetailScreen() {
             {ticket.eepIntervention && (
               <Section letter="D" title="Intervention EEP" icon={<IconTool size={16} color="#854D0E" />} iconBg={COLORS.severity.moyenne.bg}>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '12px' }} className="info-grid-2">
-                  <InfoCell label="Agent EEP" value={ticket.eepIntervention.agentName} />
+                  <InfoCell label="Agent EP">
+                    <EmployeeChip empId={eepEmployee?.id} name={ticket.eepIntervention.agentName} matricule={eepEmployee?.matricule} variant="inline" />
+                  </InfoCell>
                   <InfoCell label="Résultat">
                     {ticket.eepIntervention.result ? (
                       <span style={{
@@ -228,9 +235,21 @@ export function TicketDetailScreen() {
                   </div>
                 )}
                 {ticket.eepIntervention.comments && (
-                  <div style={{ background: COLORS.bg.page, borderRadius: '8px', padding: '10px 12px' }}>
-                    <div style={{ fontSize: '11px', color: COLORS.text.muted, marginBottom: '4px' }}>Commentaires EEP</div>
+                  <div style={{ background: COLORS.bg.page, borderRadius: '8px', padding: '10px 12px', marginBottom: '8px' }}>
+                    <div style={{ fontSize: '11px', color: COLORS.text.muted, marginBottom: '4px' }}>Commentaires EP</div>
                     <div style={{ fontSize: '13px', color: COLORS.text.secondary, lineHeight: 1.6 }}>{ticket.eepIntervention.comments}</div>
+                  </div>
+                )}
+                {eepEmployee?.vehicle && (
+                  <div style={{ background: COLORS.bg.page, borderRadius: '8px', padding: '10px 12px', marginTop: '8px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <span style={{ fontSize: '11px', color: COLORS.text.muted }}>Véhicule :</span>
+                    <span style={{ fontSize: '12px', fontWeight: 500, color: COLORS.text.primary, fontFamily: 'monospace' }}>{eepEmployee.vehicle.plate}</span>
+                    <span style={{ fontSize: '12px', color: COLORS.text.secondary }}>· {eepEmployee.vehicle.brand} {eepEmployee.vehicle.model}</span>
+                  </div>
+                )}
+                {ticket.eepIntervention.photos?.length > 0 && (
+                  <div style={{ marginTop: '8px' }}>
+                    <PhotoGrid photos={ticket.eepIntervention.photos} label="Photos terrain EP" />
                   </div>
                 )}
               </Section>
@@ -273,7 +292,9 @@ export function TicketDetailScreen() {
             {ticket.sedIntervention && (
               <Section letter="F" title="Intervention SED" icon={<IconBuildingWarehouse size={16} color="#7C2D12" />} iconBg="#FED7AA">
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '12px' }} className="info-grid-2">
-                  <InfoCell label="Agent SED"    value={ticket.sedIntervention.agentName} />
+                  <InfoCell label="Agent SED">
+                    <EmployeeChip empId={sedEmployee?.id} name={ticket.sedIntervention.agentName} matricule={sedEmployee?.matricule} variant="inline" />
+                  </InfoCell>
                   <InfoCell label="Reçu le"      value={formatDateTime(ticket.sedIntervention.receivedAt)} />
                   {ticket.sedIntervention.startedAt && (
                     <InfoCell label="Début" value={formatDateTime(ticket.sedIntervention.startedAt)} />
@@ -297,9 +318,21 @@ export function TicketDetailScreen() {
                   </div>
                 )}
                 {ticket.sedIntervention.report && (
-                  <div style={{ background: COLORS.bg.page, borderRadius: '8px', padding: '10px 12px' }}>
+                  <div style={{ background: COLORS.bg.page, borderRadius: '8px', padding: '10px 12px', marginBottom: '8px' }}>
                     <div style={{ fontSize: '11px', color: COLORS.text.muted, marginBottom: '4px' }}>Rapport SED</div>
                     <div style={{ fontSize: '13px', color: COLORS.text.primary, lineHeight: 1.6 }}>{ticket.sedIntervention.report}</div>
+                  </div>
+                )}
+                {sedEmployee?.vehicle && (
+                  <div style={{ background: COLORS.bg.page, borderRadius: '8px', padding: '10px 12px', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <span style={{ fontSize: '11px', color: COLORS.text.muted }}>Véhicule :</span>
+                    <span style={{ fontSize: '12px', fontWeight: 500, color: COLORS.text.primary, fontFamily: 'monospace' }}>{sedEmployee.vehicle.plate}</span>
+                    <span style={{ fontSize: '12px', color: COLORS.text.secondary }}>· {sedEmployee.vehicle.brand} {sedEmployee.vehicle.model}</span>
+                  </div>
+                )}
+                {ticket.sedIntervention.photos?.length > 0 && (
+                  <div style={{ marginTop: '8px' }}>
+                    <PhotoGrid photos={ticket.sedIntervention.photos} label="Photos terrain SED" />
                   </div>
                 )}
               </Section>

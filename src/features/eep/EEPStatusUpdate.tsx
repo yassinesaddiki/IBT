@@ -40,7 +40,6 @@ export function EEPStatusUpdate() {
   const navigate     = useNavigate()
   const tickets      = useTicketStore((s) => s.tickets)
   const startEEP     = useTicketStore((s) => s.startEEP)
-  const updateStatus = useTicketStore((s) => s.updateStatus)
 
   const ticket   = tickets.find((t) => t.id === id)
   const [selected, setSelected] = useState<EEPAction | null>(null)
@@ -48,22 +47,20 @@ export function EEPStatusUpdate() {
 
   if (!ticket) return null
 
-  const handleConfirm = () => {
+  const handleConfirm = async () => {
     if (!selected) return
     setSaving(true)
-    setTimeout(() => {
-      if (selected === 'en-cours-eep') {
-        startEEP(ticket.id)
-        navigate(`/eep/ticket/${ticket.id}`)
-      } else if (selected === 'resolu-eep') {
-        navigate(`/eep/ticket/${ticket.id}/rapport`)
-      } else if (selected === 'refere-sed') {
-        navigate(`/eep/ticket/${ticket.id}/referer`)
-      } else {
-        updateStatus(ticket.id, selected)
-        navigate(`/eep/ticket/${ticket.id}`)
-      }
-    }, 600)
+    if (selected === 'en-cours-eep') {
+      await startEEP(ticket.id)
+      navigate(`/eep/ticket/${ticket.id}`)
+    } else if (selected === 'resolu-eep') {
+      navigate(`/eep/ticket/${ticket.id}/rapport`)
+    } else if (selected === 'refere-sed') {
+      navigate(`/eep/ticket/${ticket.id}/referer`)
+    } else {
+      navigate(`/eep/ticket/${ticket.id}`)
+    }
+    setSaving(false)
   }
 
   return (

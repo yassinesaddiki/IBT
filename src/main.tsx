@@ -8,17 +8,22 @@ import { useCategoryStore } from './store/categoryStore'
 import { useEmployeeStore } from './store/employeeStore'
 import { useVehicleStore } from './store/vehicleStore'
 import { useAccountStore } from './store/accountStore'
+import { useTicketStore } from './store/ticketStore'
+
+// Clear stale localStorage keys from old mock-data era
+const STALE_KEYS = ['ibt-tickets']
+STALE_KEYS.forEach((k) => localStorage.removeItem(k))
 
 // Bootstrap all stores from Supabase on app load
 async function initStores() {
   await Promise.allSettled([
+    useTicketStore.getState().init(),
     useDutyStore.getState().init(),
     useCategoryStore.getState().init(),
     useEmployeeStore.getState().init(),
     useAccountStore.getState().init(),
+    useVehicleStore.getState().init(),
   ])
-  // Vehicles don't have a Supabase-backed init yet — they use localStorage
-  void useVehicleStore.getState()
 }
 
 initStores()

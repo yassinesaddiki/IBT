@@ -5,6 +5,8 @@ import { SubNav } from '../../shared/components/SubNav'
 import { COORDINATOR_NAV } from './coordinatorNav'
 import { COLORS } from '../../design-system/tokens'
 import { useDutyStore } from '../../store/dutyStore'
+import { useEmployeeStore } from '../../store/employeeStore'
+import { EmployeeChip } from '../../shared/components/EmployeeChip'
 
 // Generate 4 weeks starting from current week
 function getWeeks(): { label: string; range: string; start: Date }[] {
@@ -35,6 +37,7 @@ export function DutyScheduleScreen() {
   const [saving,  setSaving]  = useState(false)
 
   const { agents, sectors, setSlotAgent: storeSetSlot, getSlotAgent: storeGetSlot } = useDutyStore()
+  const employees = useEmployeeStore((s) => s.employees)
 
   const week = weeks[weekIdx]
 
@@ -168,18 +171,21 @@ export function DutyScheduleScreen() {
                       borderRadius: '10px', padding: '10px 12px',
                     }}>
                       {/* Current agent preview */}
-                      {currentAgent && (
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
-                          <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: COLORS.semantic.info.bg, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px', fontWeight: 500, color: COLORS.semantic.info.text, flexShrink: 0 }}>
-                            {currentAgent.initials}
+                      {currentAgent && (() => {
+                        const emp = employees.find((e) => e.name === currentAgent.name)
+                        return (
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+                            <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: COLORS.semantic.info.bg, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px', fontWeight: 500, color: COLORS.semantic.info.text, flexShrink: 0 }}>
+                              {currentAgent.initials}
+                            </div>
+                            <div style={{ flex: 1 }}>
+                              <EmployeeChip empId={emp?.id} name={currentAgent.name} matricule={emp?.matricule} variant="block" />
+                              <div style={{ fontSize: '11px', color: COLORS.text.secondary, marginTop: '1px' }}>{currentAgent.phone}</div>
+                            </div>
+                            <span style={{ width: '7px', height: '7px', borderRadius: '50%', background: currentAgent.online ? COLORS.brand.green : COLORS.text.muted, flexShrink: 0 }} />
                           </div>
-                          <div>
-                            <div style={{ fontSize: '13px', fontWeight: 500, color: COLORS.text.primary }}>{currentAgent.name}</div>
-                            <div style={{ fontSize: '11px', color: COLORS.text.secondary }}>{currentAgent.phone}</div>
-                          </div>
-                          <span style={{ marginLeft: 'auto', width: '7px', height: '7px', borderRadius: '50%', background: currentAgent.online ? COLORS.brand.green : COLORS.text.muted, flexShrink: 0 }} />
-                        </div>
-                      )}
+                        )
+                      })()}
 
                       {/* Dropdown to change */}
                       <select

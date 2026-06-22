@@ -29,9 +29,9 @@ export function EEPTicketDetail() {
 
   const canTakeAction = ticket.status === 'nouveau' || ticket.status === 'assigne' || ticket.status === 'lu-eep' || ticket.status === 'en-cours-eep'
 
-  const handlePriseEnCharge = () => {
+  const handlePriseEnCharge = async () => {
     if (ticket.status === 'nouveau' || ticket.status === 'assigne') {
-      markRead(ticket.id, user?.id ?? 'eep-1', user?.name ?? 'Agent EEP')
+      await markRead(ticket.id, user?.id ?? 'eep-1', user?.name ?? 'Agent EEP')
     }
     navigate(`/eep/ticket/${ticket.id}/statut`)
   }

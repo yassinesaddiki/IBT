@@ -52,21 +52,20 @@ export function SEDStatusUpdate() {
 
   if (!ticket) return null
 
-  const handleConfirm = () => {
+  const handleConfirm = async () => {
     if (!selected) return
     setSaving(true)
-    setTimeout(() => {
-      if (selected === 'en-cours-sed') {
-        startSED(ticket.id, user?.id ?? 'sed-1', user?.name ?? 'Agent SED')
-        navigate(`/sed/ticket/${ticket.id}`)
-      } else if (selected === 'resolu-sed') {
-        navigate(`/sed/ticket/${ticket.id}/rapport`)
-      } else if (selected === 'suspendu') {
-        navigate(`/sed/ticket/${ticket.id}/rapport?mode=suspendu`)
-      } else if (selected === 'programme') {
-        navigate(`/sed/ticket/${ticket.id}/programmer`)
-      }
-    }, 500)
+    if (selected === 'en-cours-sed') {
+      await startSED(ticket.id, user?.id ?? 'sed-1', user?.name ?? 'Agent SED')
+      navigate(`/sed/ticket/${ticket.id}`)
+    } else if (selected === 'resolu-sed') {
+      navigate(`/sed/ticket/${ticket.id}/rapport`)
+    } else if (selected === 'suspendu') {
+      navigate(`/sed/ticket/${ticket.id}/rapport?mode=suspendu`)
+    } else if (selected === 'programme') {
+      navigate(`/sed/ticket/${ticket.id}/programmer`)
+    }
+    setSaving(false)
   }
 
   return (

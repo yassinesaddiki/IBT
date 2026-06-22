@@ -9,6 +9,8 @@ import { Card } from '../../design-system/components/Card'
 import { COLORS } from '../../design-system/tokens'
 import { useTickets } from '../../shared/hooks/useTickets'
 import { useDutyStore } from '../../store/dutyStore'
+import { useEmployeeStore } from '../../store/employeeStore'
+import { EmployeeChip } from '../../shared/components/EmployeeChip'
 import { formatElapsed } from '../../shared/utils/formatDate'
 
 export function CoordinatorDashboard() {
@@ -16,6 +18,7 @@ export function CoordinatorDashboard() {
   const navigate     = useNavigate()
   const dutyAgents   = useDutyStore((s) => s.agents)
   const sectors      = useDutyStore((s) => s.sectors)
+  const employees    = useEmployeeStore((s) => s.employees)
 
   const kpi = {
     total:   tickets.length,
@@ -120,18 +123,21 @@ export function CoordinatorDashboard() {
               {sectors.filter((s) => s.status === 'actif').map((sector) => (
                 <div key={sector.id} style={{ marginBottom: '14px' }}>
                   <div style={{ fontSize: '11px', fontWeight: 500, color: COLORS.text.secondary, textTransform: 'uppercase', letterSpacing: '.05em', marginBottom: '8px' }}>{sector.name}</div>
-                  {dutyAgents.filter((a) => a.sectorId === sector.id).map((agent) => (
-                    <div key={agent.id} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '7px 8px', background: COLORS.bg.panel, borderRadius: '8px', marginBottom: '5px' }}>
-                      <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: COLORS.semantic.info.bg, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px', fontWeight: 500, color: COLORS.semantic.info.text, flexShrink: 0 }}>
-                        {agent.initials}
+                  {dutyAgents.filter((a) => a.sectorId === sector.id).map((agent) => {
+                    const emp = employees.find((e) => e.name === agent.name)
+                    return (
+                      <div key={agent.id} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '7px 8px', background: COLORS.bg.panel, borderRadius: '8px', marginBottom: '5px' }}>
+                        <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: COLORS.semantic.info.bg, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px', fontWeight: 500, color: COLORS.semantic.info.text, flexShrink: 0 }}>
+                          {agent.initials}
+                        </div>
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <EmployeeChip empId={emp?.id} name={agent.name} matricule={emp?.matricule} variant="block" />
+                          <div style={{ fontSize: '10px', color: COLORS.text.secondary, marginTop: '1px' }}>{agent.activeTickets} tickets actifs</div>
+                        </div>
+                        <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: agent.online ? COLORS.brand.green : COLORS.text.muted, flexShrink: 0 }} />
                       </div>
-                      <div style={{ flex: 1, minWidth: 0 }}>
-                        <div style={{ fontSize: '12px', fontWeight: 500, color: COLORS.text.primary }}>{agent.name}</div>
-                        <div style={{ fontSize: '10px', color: COLORS.text.secondary }}>{agent.activeTickets} tickets actifs</div>
-                      </div>
-                      <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: agent.online ? COLORS.brand.green : COLORS.text.muted, flexShrink: 0 }} />
-                    </div>
-                  ))}
+                    )
+                  })}
                 </div>
               ))}
             </Card>

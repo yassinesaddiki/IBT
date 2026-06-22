@@ -41,7 +41,7 @@ export function ClosureScreen() {
   const { id }         = useParams<{ id: string }>()
   const navigate       = useNavigate()
   const tickets        = useTicketStore((s) => s.tickets)
-  const updateStatus   = useTicketStore((s) => s.updateStatus)
+  const closeTicket    = useTicketStore((s) => s.closeTicket)
   const user           = useAuthStore((s) => s.user)
 
   const ticket = tickets.find((t) => t.id === id)
@@ -73,14 +73,21 @@ export function ClosureScreen() {
     return Object.keys(e).length === 0
   }
 
-  const handleClose = () => {
+  const handleClose = async () => {
     if (!validate()) return
     setSaving(true)
-    setTimeout(() => {
-      updateStatus(ticket.id, 'ferme')
+    try {
+      await closeTicket(ticket.id, {
+        clientCalled,
+        satisfaction:  satisfaction as Satisfaction,
+        comments:      comments || undefined,
+        closedBy:      user?.id ?? 'cgr-1',
+      })
       setDone(true)
       setTimeout(() => navigate('/cgr/dashboard'), 1500)
-    }, 1000)
+    } catch {
+      setSaving(false)
+    }
   }
 
   return (
