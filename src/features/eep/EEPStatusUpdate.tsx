@@ -22,7 +22,7 @@ const ACTIONS: { key: EEPAction; label: string; desc: string; icon: React.ReactN
     bg: '#FEFCE8', text: '#854D0E', border: '#FEF08A',
   },
   {
-    key: 'resolu-eep', label: 'Résolu par EEP',
+    key: 'resolu-eep', label: 'Résolu par Équipe de Permanance',
     desc: 'L\'intervention est terminée et le problème est résolu.',
     icon: <IconCircleCheck size={18} color="#166534" />,
     bg: '#F0FDF4', text: '#166534', border: '#BBF7D0',

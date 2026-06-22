@@ -4,7 +4,7 @@ import { COLORS } from '../../design-system/tokens'
 import { useTickets } from '../../shared/hooks/useTickets'
 import { OBSERVER_NAV } from '../coordinator/coordinatorNav'
 import { STATUS_LABELS } from '../../shared/types/status'
-import { SECTORS } from '../../mock-data/duty-schedule'
+import { useDutyStore } from '../../store/dutyStore'
 
 function Bar({ pct, color, label, value }: { pct: number; color: string; label: string; value: string | number }) {
   return (
@@ -22,6 +22,7 @@ function Bar({ pct, color, label, value }: { pct: number; color: string; label: 
 
 export function ObserverReports() {
   const { tickets } = useTickets()
+  const sectors = useDutyStore((s) => s.sectors)
 
   const total  = tickets.length
   const fermes = tickets.filter((t) => t.status === 'ferme').length
@@ -93,9 +94,9 @@ export function ObserverReports() {
           </div>
           <div className="animate-up" style={{ background: COLORS.bg.surface, borderRadius: '14px', border: `0.5px solid ${COLORS.border.default}`, padding: '20px' }}>
             <div style={{ fontSize: '14px', fontWeight: 500, color: COLORS.text.primary, marginBottom: '16px' }}>Par secteur</div>
-            {SECTORS.map((s) => {
-              const count = tickets.filter((t) => t.sector === s).length
-              return <Bar key={s} pct={total ? (count / total) * 100 : 0} color={COLORS.brand.blue} label={s} value={count} />
+            {sectors.map((s) => {
+              const count = tickets.filter((t) => t.sector === s.name).length
+              return <Bar key={s.id} pct={total ? (count / total) * 100 : 0} color={COLORS.brand.blue} label={s.name} value={count} />
             })}
           </div>
         </div>

@@ -7,7 +7,7 @@ import { SeverityBadge } from '../../design-system/components/Badge'
 import { COLORS } from '../../design-system/tokens'
 import { useTickets } from '../../shared/hooks/useTickets'
 import { formatElapsed } from '../../shared/utils/formatDate'
-import { DUTY_SCHEDULE, SECTORS } from '../../mock-data/duty-schedule'
+import { useDutyStore } from '../../store/dutyStore'
 import type { TicketStatus } from '../../shared/types/status'
 
 type FilterStatus = TicketStatus | 'tous'
@@ -15,7 +15,7 @@ type FilterStatus = TicketStatus | 'tous'
 const FILTER_TABS: { key: FilterStatus; label: string }[] = [
   { key: 'tous',                 label: 'Tous' },
   { key: 'nouveau',              label: 'Nouveau' },
-  { key: 'en-cours-eep',        label: 'En cours EEP' },
+  { key: 'en-cours-eep',        label: 'En cours EP' },
   { key: 'en-cours-sed',        label: 'En cours SED' },
   { key: 'attente-approbation', label: 'Approbation' },
   { key: 'resolu-eep',          label: 'Résolu' },
@@ -23,8 +23,10 @@ const FILTER_TABS: { key: FilterStatus; label: string }[] = [
 ]
 
 export function CGRDashboard() {
-  const { tickets } = useTickets()
-  const navigate    = useNavigate()
+  const { tickets }  = useTickets()
+  const navigate     = useNavigate()
+  const dutyAgents   = useDutyStore((s) => s.agents)
+  const sectors      = useDutyStore((s) => s.sectors).filter((s) => s.status === 'actif')
   const [filter, setFilter]   = useState<FilterStatus>('tous')
   const [search, setSearch]   = useState('')
 
@@ -246,10 +248,10 @@ export function CGRDashboard() {
                 </div>
                 <span style={{ fontSize: '11px', color: COLORS.text.secondary }}>Sem. 25</span>
               </div>
-              {SECTORS.map((sector) => (
-                <div key={sector} style={{ marginBottom: '14px' }}>
-                  <div style={{ fontSize: '11px', fontWeight: 500, color: COLORS.text.secondary, textTransform: 'uppercase', letterSpacing: '.05em', marginBottom: '8px' }}>{sector}</div>
-                  {DUTY_SCHEDULE.filter((a) => a.sector === sector).map((agent) => (
+              {sectors.map((sector) => (
+                <div key={sector.id} style={{ marginBottom: '14px' }}>
+                  <div style={{ fontSize: '11px', fontWeight: 500, color: COLORS.text.secondary, textTransform: 'uppercase', letterSpacing: '.05em', marginBottom: '8px' }}>{sector.name}</div>
+                  {dutyAgents.filter((a) => a.sectorId === sector.id).map((agent) => (
                     <div key={agent.id} style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '8px', background: COLORS.bg.panel, borderRadius: '8px', marginBottom: '6px' }}>
                       <div style={{ width: '30px', height: '30px', borderRadius: '50%', background: COLORS.semantic.info.bg, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '11px', fontWeight: 500, color: COLORS.semantic.info.text, flexShrink: 0 }}>
                         {agent.initials}

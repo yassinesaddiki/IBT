@@ -15,12 +15,12 @@ type FilterStatus = TicketStatus | 'tous'
 const STATUS_FILTERS: { key: FilterStatus; label: string }[] = [
   { key: 'tous',                label: 'Tous' },
   { key: 'nouveau',             label: 'Nouveau' },
-  { key: 'en-cours-eep',       label: 'En cours EEP' },
+  { key: 'en-cours-eep',       label: 'En cours EP' },
   { key: 'attente-approbation', label: 'En attente approbation' },
   { key: 'en-cours-sed',       label: 'En cours SED' },
   { key: 'suspendu',           label: 'Suspendu' },
   { key: 'programme',          label: 'Programmé' },
-  { key: 'resolu-eep',         label: 'Résolu EEP' },
+  { key: 'resolu-eep',         label: 'Résolu EP' },
   { key: 'resolu-sed',         label: 'Résolu SED' },
   { key: 'ferme',              label: 'Fermé' },
 ]

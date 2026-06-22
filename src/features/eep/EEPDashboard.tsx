@@ -43,7 +43,7 @@ export function EEPDashboard() {
               <IconBolt size={18} color="#fff" />
             </div>
             <div>
-              <div style={{ color: '#fff', fontSize: '14px', fontWeight: 500 }}>IBT · EEP</div>
+              <div style={{ color: '#fff', fontSize: '14px', fontWeight: 500 }}>IBT · Équipe de Permanance</div>
               <div style={{ color: 'rgba(255,255,255,0.6)', fontSize: '11px' }}>{user?.sector ?? 'Équipe terrain'}</div>
             </div>
           </div>

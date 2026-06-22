@@ -5,7 +5,7 @@ import { NavBar } from '../../shared/components/NavBar'
 import { SubNav } from '../../shared/components/SubNav'
 import { OBSERVER_NAV } from '../coordinator/coordinatorNav'
 import { COLORS } from '../../design-system/tokens'
-import { DUTY_SCHEDULE, SECTORS } from '../../mock-data/duty-schedule'
+import { useDutyStore } from '../../store/dutyStore'
 
 function getWeeks(): { label: string; range: string; weekNum: number }[] {
   const today = new Date()
@@ -28,12 +28,14 @@ function getWeeks(): { label: string; range: string; weekNum: number }[] {
 }
 
 export function ObserverDutySchedule() {
-  const navigate = useNavigate()
-  const weeks    = getWeeks()
+  const navigate   = useNavigate()
+  const weeks      = getWeeks()
   const [weekIdx, setWeekIdx] = useState(0)
-  const week = weeks[weekIdx]
+  const week       = weeks[weekIdx]
+  const dutyAgents = useDutyStore((s) => s.agents)
+  const sectors    = useDutyStore((s) => s.sectors).filter((s) => s.status === 'actif')
 
-  const onlineCount = DUTY_SCHEDULE.filter((a) => a.online).length
+  const onlineCount = dutyAgents.filter((a) => a.online).length
 
   return (
     <div style={{ maxWidth: '1380px', margin: '0 auto', padding: '20px 20px 40px' }}>
@@ -53,7 +55,7 @@ export function ObserverDutySchedule() {
           <div>
             <div style={{ fontSize: '20px', fontWeight: 500, color: COLORS.text.primary }}>Planning de Garde</div>
             <div style={{ fontSize: '13px', color: COLORS.text.secondary, marginTop: '4px' }}>
-              {onlineCount} agents en ligne actuellement · {DUTY_SCHEDULE.length} agents de garde
+              {onlineCount} agents en ligne actuellement · {dutyAgents.length} agents de garde
             </div>
           </div>
           <button
@@ -87,13 +89,13 @@ export function ObserverDutySchedule() {
 
         {/* Quick stats row */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '12px', marginBottom: '20px' }} className="obs-schedule-kpi">
-          {SECTORS.map((sector) => {
-            const agents = DUTY_SCHEDULE.filter((a) => a.sector === sector)
+          {sectors.map((sector) => {
+            const agents = dutyAgents.filter((a) => a.sectorId === sector.id)
             const online = agents.filter((a) => a.online).length
             const totalTickets = agents.reduce((sum, a) => sum + a.activeTickets, 0)
             return (
-              <div key={sector} className="animate-up" style={{ background: COLORS.bg.surface, borderRadius: '12px', border: `0.5px solid ${COLORS.border.default}`, padding: '14px 16px' }}>
-                <div style={{ fontSize: '11px', color: COLORS.text.muted, marginBottom: '4px', textTransform: 'uppercase', letterSpacing: '.05em' }}>{sector}</div>
+              <div key={sector.id} className="animate-up" style={{ background: COLORS.bg.surface, borderRadius: '12px', border: `0.5px solid ${COLORS.border.default}`, padding: '14px 16px' }}>
+                <div style={{ fontSize: '11px', color: COLORS.text.muted, marginBottom: '4px', textTransform: 'uppercase', letterSpacing: '.05em' }}>{sector.name}</div>
                 <div style={{ fontSize: '20px', fontWeight: 500, color: COLORS.text.primary, marginBottom: '4px' }}>{agents.length} agents</div>
                 <div style={{ fontSize: '11px', color: COLORS.text.secondary, display: 'flex', alignItems: 'center', gap: '8px' }}>
                   <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
@@ -109,13 +111,13 @@ export function ObserverDutySchedule() {
 
         {/* Sector cards grid */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '16px' }} className="obs-schedule-grid">
-          {SECTORS.map((sector) => {
-            const agents = DUTY_SCHEDULE.filter((a) => a.sector === sector)
+          {sectors.map((sector) => {
+            const agents = dutyAgents.filter((a) => a.sectorId === sector.id)
             return (
-              <div key={sector} className="animate-up" style={{ background: COLORS.bg.surface, borderRadius: '14px', border: `0.5px solid ${COLORS.border.default}`, padding: '20px' }}>
+              <div key={sector.id} className="animate-up" style={{ background: COLORS.bg.surface, borderRadius: '14px', border: `0.5px solid ${COLORS.border.default}`, padding: '20px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px', paddingBottom: '12px', borderBottom: `0.5px solid ${COLORS.border.default}` }}>
                   <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: COLORS.brand.green }} />
-                  <div style={{ fontSize: '15px', fontWeight: 500, color: COLORS.text.primary }}>{sector}</div>
+                  <div style={{ fontSize: '15px', fontWeight: 500, color: COLORS.text.primary }}>{sector.name}</div>
                   <span style={{ marginLeft: 'auto', fontSize: '11px', color: COLORS.text.muted }}>{week.label}</span>
                 </div>
 
@@ -161,7 +163,7 @@ export function ObserverDutySchedule() {
                 </tr>
               </thead>
               <tbody>
-                {DUTY_SCHEDULE.map((agent) => (
+                {dutyAgents.map((agent) => (
                   <tr key={agent.id} style={{ borderBottom: `0.5px solid #F5F5F5` }}>
                     <td style={{ padding: '12px 14px' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>

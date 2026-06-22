@@ -5,7 +5,8 @@ import { NavBar } from '../../shared/components/NavBar'
 import { COLORS } from '../../design-system/tokens'
 import { useTicketStore } from '../../store/ticketStore'
 import { useAuthStore } from '../../store/authStore'
-import { CATEGORIES, SECTORS_LIST } from '../../mock-data/categories'
+import { useCategoryStore } from '../../store/categoryStore'
+import { useDutyStore } from '../../store/dutyStore'
 import type { Severity } from '../../shared/types/ticket'
 
 const SEVERITY_OPTIONS: { value: Severity; label: string; desc: string; bg: string; text: string; border: string; dot: string }[] = [
@@ -15,9 +16,12 @@ const SEVERITY_OPTIONS: { value: Severity; label: string; desc: string; bg: stri
 ]
 
 export function NewTicketScreen() {
-  const navigate   = useNavigate()
-  const addTicket  = useTicketStore((s) => s.addTicket)
-  const user       = useAuthStore((s) => s.user)
+  const navigate    = useNavigate()
+  const addTicket   = useTicketStore((s) => s.addTicket)
+  const user        = useAuthStore((s) => s.user)
+  const categories  = useCategoryStore((s) => s.categories)
+  const allSectors  = useDutyStore((s) => s.sectors)
+  const activeSectors = allSectors.filter((s) => s.status === 'actif')
 
   // Client info
   const [clientName,      setClientName]      = useState('')
@@ -36,7 +40,7 @@ export function NewTicketScreen() {
   const [done,       setDone]       = useState(false)
   const [errors,     setErrors]     = useState<Record<string, string>>({})
 
-  const selectedCategory = CATEGORIES.find((c) => c.id === categoryId)
+  const selectedCategory = categories.find((c) => c.id === categoryId)
   const selectedSub      = selectedCategory?.subCategories.find((s) => s.id === subCategoryId)
 
   const handleCategoryChange = (id: string) => {
@@ -147,7 +151,7 @@ export function NewTicketScreen() {
               <SelectInput
                 value={sector}
                 onChange={setSector}
-                options={SECTORS_LIST.map((s) => ({ value: s, label: s }))}
+                options={activeSectors.map((s) => ({ value: s.name, label: s.name }))}
                 placeholder="Sélectionner un secteur"
                 error={!!errors.sector}
               />
@@ -170,7 +174,7 @@ export function NewTicketScreen() {
               <SelectInput
                 value={categoryId}
                 onChange={handleCategoryChange}
-                options={CATEGORIES.map((c) => ({ value: c.id, label: c.label }))}
+                options={categories.map((c) => ({ value: c.id, label: c.label }))}
                 placeholder="Sélectionner une catégorie"
                 error={!!errors.category}
               />

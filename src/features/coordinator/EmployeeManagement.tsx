@@ -5,13 +5,16 @@ import { SubNav } from '../../shared/components/SubNav'
 import { COLORS } from '../../design-system/tokens'
 import { useEmployeeStore } from '../../store/employeeStore'
 import type { Employee, EmployeeRole } from '../../mock-data/employees'
+import { ROLE_LABELS_FR, ROLE_SHORT_FR } from '../../mock-data/employees'
 import { COORDINATOR_NAV } from './coordinatorNav'
 import { useTickets } from '../../shared/hooks/useTickets'
 
 const ROLE_COLORS: Record<EmployeeRole, { bg: string; text: string; border: string }> = {
-  eep: { bg: COLORS.severity.moyenne.bg,   text: COLORS.severity.moyenne.text,   border: COLORS.severity.moyenne.border },
-  sed: { bg: '#FFF3E0',                     text: '#92400E',                       border: '#FCD34D' },
-  cgr: { bg: COLORS.semantic.info.bg,      text: COLORS.semantic.info.text,       border: COLORS.semantic.info.border! },
+  eep:         { bg: COLORS.severity.moyenne.bg,   text: COLORS.severity.moyenne.text,   border: COLORS.severity.moyenne.border },
+  sed:         { bg: '#FFF3E0',                     text: '#92400E',                       border: '#FCD34D' },
+  cgr:         { bg: COLORS.semantic.info.bg,      text: COLORS.semantic.info.text,       border: COLORS.semantic.info.border! },
+  coordinator: { bg: COLORS.status.programme.bg,   text: '#5B21B6',                       border: '#DDD6FE' },
+  observer:    { bg: COLORS.bg.panel,              text: COLORS.text.secondary,            border: COLORS.border.default },
 }
 
 export function EmployeeManagement() {
@@ -48,7 +51,7 @@ export function EmployeeManagement() {
           <div>
             <div style={{ fontSize: '20px', fontWeight: 500, color: COLORS.text.primary }}>Gestion des Employés</div>
             <div style={{ fontSize: '13px', color: COLORS.text.secondary, marginTop: '3px' }}>
-              {stats.actifs} actifs · {stats.eep} EEP · {stats.sed} SED
+              {stats.actifs} actifs · {stats.eep} Équipe de Permanance · {stats.sed} SED
             </div>
           </div>
           <button style={{ height: '40px', background: COLORS.brand.blue, color: '#fff', border: 'none', borderRadius: '8px', fontSize: '13px', fontWeight: 500, cursor: 'pointer', padding: '0 18px', display: 'inline-flex', alignItems: 'center', gap: '6px', fontFamily: 'inherit' }}>
@@ -61,7 +64,7 @@ export function EmployeeManagement() {
           {[
             { label: 'Total employés', value: stats.total, color: COLORS.text.primary },
             { label: 'Actifs',         value: stats.actifs, color: COLORS.brand.green },
-            { label: 'Équipe EEP',     value: stats.eep,   color: '#854D0E' },
+            { label: 'Équipe de Permanance', value: stats.eep, color: '#854D0E' },
             { label: 'Équipe SED',     value: stats.sed,   color: '#92400E' },
           ].map((k) => (
             <div key={k.label} className="animate-up" style={{ background: COLORS.bg.surface, borderRadius: '12px', border: `0.5px solid ${COLORS.border.default}`, padding: '16px 18px' }}>
@@ -83,7 +86,7 @@ export function EmployeeManagement() {
             {(['tous', 'eep', 'sed', 'cgr'] as const).map((r) => (
               <button key={r} onClick={() => setRoleFilter(r)}
                 style={{ height: '34px', padding: '0 12px', borderRadius: '20px', fontSize: '12px', fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit', background: roleFilter === r ? COLORS.semantic.info.bg : COLORS.bg.page, color: roleFilter === r ? COLORS.semantic.info.text : COLORS.text.secondary, border: roleFilter === r ? `0.5px solid ${COLORS.semantic.info.border}` : `0.5px solid ${COLORS.border.default}` }}>
-                {r === 'tous' ? 'Tous' : r.toUpperCase()}
+                {r === 'tous' ? 'Tous' : ROLE_SHORT_FR[r as EmployeeRole]}
               </button>
             ))}
           </div>
@@ -116,7 +119,7 @@ export function EmployeeManagement() {
                       <td style={{ padding: '12px 8px', fontSize: '12px', fontFamily: 'monospace', color: COLORS.text.secondary }}>{emp.matricule}</td>
                       <td style={{ padding: '12px 8px' }}>
                         <span style={{ fontSize: '11px', fontWeight: 500, padding: '3px 8px', borderRadius: '20px', background: rc.bg, color: rc.text, border: `0.5px solid ${rc.border}` }}>
-                          {emp.role.toUpperCase()}
+                          {ROLE_LABELS_FR[emp.role]}
                         </span>
                       </td>
                       <td style={{ padding: '12px 8px', fontSize: '13px', color: COLORS.text.secondary }}>{emp.sector ?? '—'}</td>

@@ -4,8 +4,8 @@ import { COLORS } from '../../design-system/tokens'
 import { useTickets } from '../../shared/hooks/useTickets'
 import { COORDINATOR_NAV } from './coordinatorNav'
 import { STATUS_LABELS } from '../../shared/types/status'
-import { MOCK_EMPLOYEES } from '../../mock-data/employees'
-import { SECTORS } from '../../mock-data/duty-schedule'
+import { useEmployeeStore } from '../../store/employeeStore'
+import { useDutyStore } from '../../store/dutyStore'
 
 function Bar({ pct, color, label, value }: { pct: number; color: string; label: string; value: string | number }) {
   return (
@@ -22,7 +22,9 @@ function Bar({ pct, color, label, value }: { pct: number; color: string; label: 
 }
 
 export function ReportsScreen() {
-  const { tickets } = useTickets()
+  const { tickets }  = useTickets()
+  const employees    = useEmployeeStore((s) => s.employees)
+  const sectors      = useDutyStore((s) => s.sectors)
   const pendingApproval = tickets.filter((t) => t.status === 'attente-approbation').length
 
   const total  = tickets.length
@@ -52,14 +54,14 @@ export function ReportsScreen() {
     { label: 'Moyenne',  color: '#EAB308', count: tickets.filter((t) => t.severity === 'Moyenne').length },
   ]
 
-  // By sector
-  const sectorGroups = SECTORS.map((s) => ({
-    label: s,
-    count: tickets.filter((t) => t.sector === s).length,
+  // By sector (from store — reflects any renames)
+  const sectorGroups = sectors.map((s) => ({
+    label: s.name,
+    count: tickets.filter((t) => t.sector === s.name).length,
   }))
 
   // Agent performance
-  const eepAgents = MOCK_EMPLOYEES.filter((e) => e.role === 'eep')
+  const eepAgents = employees.filter((e) => e.role === 'eep')
 
   return (
     <div style={{ maxWidth: '1380px', margin: '0 auto', padding: '20px 20px 40px' }}>

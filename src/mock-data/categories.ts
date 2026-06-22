@@ -1,3 +1,6 @@
+// SECTORS_LIST is intentionally removed from this file.
+// All sector lists must come from useDutyStore().sectors — never hardcoded.
+
 import type { Severity } from '../shared/types/ticket'
 
 export interface SubCategory {
@@ -49,5 +52,3 @@ export const CATEGORIES: Category[] = [
     ],
   },
 ]
-
-export const SECTORS_LIST = ['Oud Nachif', 'Secteur Est', 'Secteur Ouest', 'Secteur Sud']

@@ -17,9 +17,9 @@ export type TicketStatus =
 export const STATUS_LABELS: Record<TicketStatus, string> = {
   'nouveau':               'Nouveau',
   'assigne':               'Assigné',
-  'lu-eep':                'Lu par EEP',
-  'en-cours-eep':          'En cours — EEP',
-  'resolu-eep':            'Résolu — EEP',
+  'lu-eep':                'Lu par EP',
+  'en-cours-eep':          'En cours — EP',
+  'resolu-eep':            'Résolu — EP',
   'refere-sed':            'Référé à SED',
   'attente-approbation':   'Att. approbation',
   'approuve-sed':          'Approuvé → SED',

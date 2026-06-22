@@ -8,18 +8,20 @@ import { SeverityBadge } from '../../design-system/components/Badge'
 import { Card } from '../../design-system/components/Card'
 import { COLORS } from '../../design-system/tokens'
 import { useTickets } from '../../shared/hooks/useTickets'
-import { DUTY_SCHEDULE, SECTORS } from '../../mock-data/duty-schedule'
+import { useDutyStore } from '../../store/dutyStore'
 import { formatElapsed } from '../../shared/utils/formatDate'
 
 export function CoordinatorDashboard() {
-  const { tickets } = useTickets()
-  const navigate    = useNavigate()
+  const { tickets }  = useTickets()
+  const navigate     = useNavigate()
+  const dutyAgents   = useDutyStore((s) => s.agents)
+  const sectors      = useDutyStore((s) => s.sectors)
 
   const kpi = {
-    total:     tickets.length,
-    attente:   tickets.filter((t) => t.status === 'attente-approbation').length,
-    resolus:   tickets.filter((t) => t.status === 'resolu-eep' || t.status === 'resolu-sed' || t.status === 'ferme').length,
-    agents:    DUTY_SCHEDULE.filter((a) => a.online).length,
+    total:   tickets.length,
+    attente: tickets.filter((t) => t.status === 'attente-approbation').length,
+    resolus: tickets.filter((t) => t.status === 'resolu-eep' || t.status === 'resolu-sed' || t.status === 'ferme').length,
+    agents:  dutyAgents.filter((a) => a.online).length,
   }
 
   const pendingApproval = tickets.filter((t) => t.status === 'attente-approbation')
@@ -115,10 +117,10 @@ export function CoordinatorDashboard() {
           <aside style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
             <Card>
               <div style={{ fontSize: '14px', fontWeight: 500, color: COLORS.text.primary, marginBottom: '14px' }}>Équipe de garde</div>
-              {SECTORS.map((sector) => (
-                <div key={sector} style={{ marginBottom: '14px' }}>
-                  <div style={{ fontSize: '11px', fontWeight: 500, color: COLORS.text.secondary, textTransform: 'uppercase', letterSpacing: '.05em', marginBottom: '8px' }}>{sector}</div>
-                  {DUTY_SCHEDULE.filter((a) => a.sector === sector).map((agent) => (
+              {sectors.filter((s) => s.status === 'actif').map((sector) => (
+                <div key={sector.id} style={{ marginBottom: '14px' }}>
+                  <div style={{ fontSize: '11px', fontWeight: 500, color: COLORS.text.secondary, textTransform: 'uppercase', letterSpacing: '.05em', marginBottom: '8px' }}>{sector.name}</div>
+                  {dutyAgents.filter((a) => a.sectorId === sector.id).map((agent) => (
                     <div key={agent.id} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '7px 8px', background: COLORS.bg.panel, borderRadius: '8px', marginBottom: '5px' }}>
                       <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: COLORS.semantic.info.bg, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px', fontWeight: 500, color: COLORS.semantic.info.text, flexShrink: 0 }}>
                         {agent.initials}
