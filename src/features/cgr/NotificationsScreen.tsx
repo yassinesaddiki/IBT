@@ -1,9 +1,9 @@
-import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { IconBell, IconBellOff, IconTicket } from '@tabler/icons-react'
 import { NavBar } from '../../shared/components/NavBar'
 import { COLORS } from '../../design-system/tokens'
-import { MOCK_NOTIFICATIONS } from '../../mock-data/notifications'
+import { useNotificationStore } from '../../store/notificationStore'
+import { useAuthStore } from '../../store/authStore'
 
 const TYPE_STYLE = {
   info:    { bg: COLORS.semantic.info.bg,    text: COLORS.semantic.info.text,    border: COLORS.semantic.info.border!,  dot: COLORS.brand.blue },
@@ -14,13 +14,10 @@ const TYPE_STYLE = {
 
 export function NotificationsScreen() {
   const navigate = useNavigate()
-  const cgr = MOCK_NOTIFICATIONS.filter((n) => n.roles.includes('cgr'))
-  const [items, setItems] = useState(cgr)
+  const user     = useAuthStore((s) => s.user)
+  const { notifications, markRead, markAllRead } = useNotificationStore()
 
-  const unread = items.filter((n) => !n.read).length
-
-  const markAllRead = () => setItems((prev) => prev.map((n) => ({ ...n, read: true })))
-  const markRead = (id: string) => setItems((prev) => prev.map((n) => n.id === id ? { ...n, read: true } : n))
+  const unread = notifications.filter((n) => !n.read).length
 
   return (
     <div style={{ maxWidth: '1380px', margin: '0 auto', padding: '20px 20px 40px' }}>
@@ -46,7 +43,7 @@ export function NotificationsScreen() {
           </div>
           <div style={{ display: 'flex', gap: '8px' }}>
             {unread > 0 && (
-              <button onClick={markAllRead} style={{ height: '34px', background: COLORS.bg.surface, color: COLORS.text.secondary, border: `0.5px solid ${COLORS.border.strong}`, borderRadius: '8px', fontSize: '12px', cursor: 'pointer', padding: '0 14px', fontFamily: 'inherit' }}>
+              <button onClick={() => markAllRead(user?.id ?? '')} style={{ height: '34px', background: COLORS.bg.surface, color: COLORS.text.secondary, border: `0.5px solid ${COLORS.border.strong}`, borderRadius: '8px', fontSize: '12px', cursor: 'pointer', padding: '0 14px', fontFamily: 'inherit' }}>
                 Tout marquer comme lu
               </button>
             )}
@@ -57,14 +54,14 @@ export function NotificationsScreen() {
         </div>
 
         {/* Notifications list */}
-        {items.length === 0 ? (
+        {notifications.length === 0 ? (
           <div style={{ textAlign: 'center', padding: '80px 20px', color: COLORS.text.muted }}>
             <IconBellOff size={40} style={{ marginBottom: '12px', opacity: 0.3 }} />
             <div style={{ fontSize: '14px' }}>Aucune notification</div>
           </div>
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-            {items.map((n) => {
+            {notifications.map((n) => {
               const s = TYPE_STYLE[n.type]
               return (
                 <div

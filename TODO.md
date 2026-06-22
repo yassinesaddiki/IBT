@@ -72,6 +72,225 @@
 
 ---
 
+### TÂCHE A — Session perdue au refresh (CRITIQUE — bloque tout)
+
+**Problème :** `authStore.ts` utilise `create<AuthState>()` sans le middleware `persist`. La session utilisateur (`user`) est stockée uniquement en mémoire. Chaque rechargement de page → `user = null` → toutes les routes `ProtectedRoute` redirigent vers `/login`.
+
+**Fichier :** `src/store/authStore.ts`
+
+**Fix :**
+1. Ajouter `import { persist } from 'zustand/middleware'`
+2. Wrapper le store avec `persist(fn, { name: 'ibt-auth', partialize: (s) => ({ user: s.user }) })`
+3. Le `user` sauvegardé en localStorage survivra au refresh
+4. NE PAS stocker `login()` et `logout()` — uniquement `user`
+5. Après fix, retirer la ligne `localStorage.removeItem('ibt-tickets')` de `main.tsx` car ça vide aussi d'autres clés
+
+**Note :** C'est aussi pourquoi cliquer sur un lien `/employee/:id` redirige parfois vers login — l'user est null après refresh.
+
+---
+
+### TÂCHE B — Clic profil → déconnexion (UX cassée)
+
+**Problème :** Dans `NavBar.tsx`, le cercle avatar (initiales utilisateur) et le nom n'ont AUCUN `onClick`. Le bouton de déconnexion (`IconLogout`) est collé juste à côté, sans séparation claire. L'utilisateur clique sur l'icône de déconnexion en pensant accéder à son profil.
+
+**Fichiers :** `src/shared/components/NavBar.tsx`, `src/shared/components/MobileLayout.tsx`
+
+**Fix NavBar (desktop — CGR, Coordinator, Observer) :**
+1. Rendre le bloc avatar+nom cliquable : `onClick={() => navigate('/employee/' + user?.employeeId)}`
+2. Afficher un curseur `pointer` sur hover + légère teinte de fond
+3. Séparer visuellement le bouton logout : ajouter un divider `|` ou une marge plus grande
+4. Si `user?.employeeId` est undefined, naviguer vers `/profile` (page générique de profil)
+
+**Fix MobileLayout (mobile — EP, SED) :**
+- L'en-tête mobile montre le nom/secteur mais n'est pas cliquable
+- Ajouter un `onClick` sur le bloc utilisateur → `navigate('/employee/' + user?.employeeId)`
+
+**Prérequis :** `user.employeeId` doit être propagé dans l'objet user en session (voir Tâche C).
+
+---
+
+### TÂCHE C — `user.employeeId` non propagé + login par username cassé
+
+**Problème 1 :** `authStore.login()` fait `const { password: _pw, ...user } = found` — ce qui spread tout MockUser dans user, INCLUANT `employeeId`. Mais la fonction de recherche actuelle ne matche PAS par `username`. Si l'utilisateur tape `cgr123` (le hint de l'interface), ça cherche `u.id === 'cgr123'` (raté, l'id est `'cgr-1'`) ou `u.name === 'cgr123'` (raté, le nom est `'Amina Kettani'`). La connexion échoue silencieusement si l'utilisateur suit les instructions à l'écran.
+
+**Problème 2 :** `useMyEmployee()` dans `useEmployee.ts` essaie `e.id === userId` où `userId = 'eep-1'` mais les employés ont `id = 'emp-16'`. La fonction retourne toujours `undefined`.
+
+**Fix authStore.ts login() :**
+```typescript
+const found = MOCK_USERS.find((u) =>
+  (u.id === identifier ||
+   u.username === identifier ||   // ← ajouter ceci
+   u.name.toLowerCase() === identifier.toLowerCase()) &&
+  u.password === password
+)
+```
+
+**Fix useEmployee.ts `useMyEmployee()` :**
+```typescript
+import { useAccountStore } from '../../store/accountStore'
+export function useMyEmployee(userId: string | undefined) {
+  const accounts  = useAccountStore((s) => s.accounts)
+  const employees = useEmployeeStore((s) => s.employees)
+  const vehicles  = useVehicleStore((s) => s.vehicles)
+  const account   = accounts.find((a) => a.id === userId)
+  const empId     = account?.employeeId ?? userId
+  const emp       = employees.find((e) => e.id === empId)
+  if (!emp) return undefined
+  return { ...emp, vehicle: emp.vehicleId ? vehicles.find((v) => v.id === emp.vehicleId) : undefined }
+}
+```
+
+**Fix authStore.login() — aussi appeler notificationStore.init() après login :**
+```typescript
+import { initNotifications } from './notificationStore'
+// après set({ user }) :
+void initNotifications(found.id)
+```
+
+---
+
+### TÂCHE D — Noms employés non cliquables dans les tickets et rapports
+
+**Problème :** `EmployeeChip` est correctement implémenté et navigue vers `/employee/:id`, MAIS plusieurs écrans affichent encore les noms d'agents en texte brut sans l'utiliser.
+
+**Fichiers à mettre à jour :**
+
+**`src/features/cgr/TicketDetailScreen.tsx`** — Section D (Intervention EP) et F (SED) :
+- Actuellement : `<InfoCell label="Agent EEP" value={ticket.eepIntervention.agentName} />`
+- Devrait être : `<EmployeeChip empId={useEmployeeByName(ticket.eepIntervention.agentName)?.id} name={ticket.eepIntervention.agentName} matricule={...} />`
+- Créer un `EmployeeSection` local qui utilise `useEmployeeByName(agentName)` pour résoudre l'id
+
+**`src/features/coordinator/ApprovalScreen.tsx`** — Section rapport EP :
+- L'agent EP qui a soumis le rapport est affiché en texte brut
+- Remplacer par `EmployeeChip` avec `useEmployeeByName()`
+
+**`src/features/sed/SEDTicketDetail.tsx`** — Bloc "Rapport EP" :
+- `Agent EEP: ticket.eepIntervention.agentName` → EmployeeChip
+
+**Pattern à utiliser partout :**
+```typescript
+const emp = useEmployeeByName(ticket.eepIntervention?.agentName)
+<EmployeeChip empId={emp?.id} name={ticket.eepIntervention.agentName} matricule={emp?.matricule} />
+```
+
+**Note :** `useEmployeeByName` est déjà dans `src/shared/hooks/useEmployee.ts` — l'importer et l'utiliser.
+
+---
+
+### TÂCHE E — Planning de garde vide (race condition + données de la mauvaise semaine)
+
+**Problème 1 — Race condition :**
+`useCurrentDuty()` appelle `getWeekStart(new Date())` pour trouver la semaine courante, puis cherche dans `dutyStore.schedule`. Mais au moment du premier rendu, `dutyStore.init()` n'a peut-être pas encore chargé depuis Supabase. Résultat : la sidebar "Équipe de garde" est vide au premier render, même si des données existent.
+
+**Problème 2 — Seed de la mauvaise semaine :**
+`seed.sql` insère le planning pour la semaine `2026-06-16`. Si l'app tourne une autre semaine, `getWeekStart(new Date())` retourne une date différente → aucun slot trouvé → planning vide.
+
+**Fix :**
+1. Modifier `seed.sql` pour que la date du planning s'adapte dynamiquement :
+```sql
+-- Utiliser la semaine courante au lieu de '2026-06-16'
+-- Calculer le lundi de la semaine en cours côté SQL :
+INSERT INTO duty_schedule (week_start, sector_id, slot_index, employee_id) VALUES
+  (date_trunc('week', CURRENT_DATE)::date, 's-1', 0, 'emp-1'),
+  (date_trunc('week', CURRENT_DATE)::date, 's-1', 1, 'emp-2'),
+  ...
+ON CONFLICT DO NOTHING;
+```
+2. Ou : afficher dans les sidebars "Aucune permanance planifiée cette semaine — [Gérer le planning]" avec lien vers `/coordinator/planning` quand le planning est vide, au lieu d'une sidebar complètement vide.
+3. Ajouter un indicateur de chargement dans les sidebars pendant que `dutyStore.loading === true`.
+
+---
+
+### TÂCHE F — Notifications jamais initialisées depuis Supabase
+
+**Problème :** `notificationStore.init(userId)` n'est nulle part appelé au démarrage. Les 4 écrans de notifications tombent systématiquement sur les MOCK_NOTIFICATIONS comme fallback, jamais sur les vraies données Supabase.
+
+**Fix :**
+1. Dans `authStore.ts login()` — après le `set({ user })` :
+   ```typescript
+   import { initNotifications } from './notificationStore'
+   void initNotifications(found.id)
+   ```
+2. Dans `main.tsx` — après `initStores()`, si l'utilisateur est déjà connecté (session persistée) :
+   ```typescript
+   const user = useAuthStore.getState().user
+   if (user) void useNotificationStore.getState().init(user.id)
+   ```
+3. Optionnel : ajouter une subscription Supabase Realtime dans `notificationStore.init()` pour les notifications en temps réel.
+
+---
+
+### TÂCHE G — Audit général — fonctionnalités manquantes ou cassées
+
+**G1 — Photos terrain : pas encore implémentées (bloquant pour la démo)**
+
+Les écrans suivants montrent des placeholders photos mais n'uploadent rien :
+- `EEPInterventionReport.tsx` — photos terrain EP
+- `SEDInterventionReport.tsx` — photos terrain SED
+- `EEPReferToSED.tsx` — photos jointes lors du référencement (indispensable pour que le coordinateur voie la situation)
+
+Ce sont les Tâches 6 et 7 du TODO principal (Supabase Storage). À implémenter en priorité après les bugs A-F.
+
+**G2 — MobileLayout : pas de lien profil pour EP/SED**
+- En-tête mobile montre nom + secteur mais aucun moyen de voir son profil
+- Fix : rendre le bloc utilisateur cliquable → `/employee/${user?.employeeId}`
+
+**G3 — Ticket créé → EEP notifiée ? Non**
+- La création d'un ticket n'insère rien dans `notifications` Supabase
+- L'EP ne reçoit aucune alerte push/in-app pour les nouveaux tickets de son secteur
+- Fix intermédiaire : à la création d'un ticket, insérer une notification pour tous les comptes EP du secteur correspondant
+
+**G4 — Ticket résolu → CGR notifiée ? Non**
+- Quand l'EP résout un ticket, aucune notification n'est créée pour le CGR
+- Même problème pour toutes les transitions de statut (référencement, approbation, etc.)
+- Fix : dans chaque mutation du `ticketStore`, appeler une fonction `createNotification(userId, type, title, message, ticketId)` qui insère dans Supabase
+
+**G5 — AuthStore match username manquant (voir Tâche C)**
+- Actuellement le login par `cgr123` ne fonctionne peut-être pas
+- Test rapide : login avec identifiant `Amina Kettani` et mot de passe `cgr123` — si ça marche, le bug est confirmé côté username
+
+**G6 — `useDutyAgents.getWeekStart()` vs `DutyScheduleScreen.getWeeks()` — deux calculs différents**
+- `getWeekStart()` dans `useDutyAgents.ts` calcule le lundi de la semaine courante
+- `getWeeks()` dans `DutyScheduleScreen.tsx` aussi, mais avec une logique légèrement différente
+- Quand l'utilisateur navigue dans le planning sur une semaine future, `useCurrentDuty()` affiche toujours LA SEMAINE ACTUELLE, pas la semaine sélectionnée
+- Fix : `DutyScheduleScreen` devrait passer la semaine sélectionnée à ses composants via prop/contexte
+
+**G7 — Ticket assigné à quel EP ? Actuellement non résolu**
+- Quand un ticket est créé pour le secteur S, il n'est "assigné" à personne spécifiquement
+- L'EP voit tous les tickets de son secteur (via filtre secteur) — OK pour l'instant
+- Mais le `eep_interventions.agent_id` n'est rempli que quand l'EP clique sur le ticket
+- Avant ça, `agentId = ''` → pas de lien vers un profil
+
+**G8 — TicketDetailScreen manque l'affichage du véhicule de l'intervenant**
+- La Tâche 5 du TODO original (véhicule visible sur les tickets) n'est pas implémentée
+- `TicketDetailScreen`, `SEDTicketDetail`, `ApprovalScreen` : ajouter `Véhicule : DO 248 · Dacia Sandero` sous le nom de l'agent
+- Utiliser `useEmployee(agentId)?.vehicle` pour afficher la plaque + marque/modèle
+
+**G9 — `SEDStatusUpdate.tsx` : `updateStatus` supprimé mais le else-case ne fait rien**
+- Après la migration vers Supabase, on a supprimé `updateStatus`
+- Dans `SEDStatusUpdate.handleConfirm()`, les cas `resolu-sed`, `suspendu`, `programme` naviguent vers les bons écrans → OK
+- Mais le cas `else` ne fait rien (pour `lu-eep` / `en-cours-eep` qui n'existent pas pour SED)
+- Vérifier que tous les cas SED sont bien couverts
+
+**G10 — `ClosureScreen.tsx` : type `Satisfaction` non exporté**
+- `const payload: Omit<TicketClosure, 'closedAt'>` inclut `satisfaction: satisfaction as Satisfaction`
+- Mais `Satisfaction` est défini localement dans ClosureScreen — l'exporter depuis `ticket.ts`
+
+**G11 — Réactivité : tickets non rechargés automatiquement**
+- Les dashboards montrent les tickets chargés au démarrage
+- Si un autre utilisateur crée ou modifie un ticket, l'app ne le sait pas (pas de Supabase Realtime)
+- Fix intermédiaire : ajouter un bouton "Actualiser" sur les dashboards
+- Fix complet : Supabase Realtime subscriptions (Tâche 5 du TODO original)
+
+**G12 — Observer : `ObserverTickets.tsx` utilise encore le ticketStore (mock ou Supabase ?)**
+- Vérifier que `ObserverTickets` lit bien depuis le store Supabase-backed et non depuis un import mock direct
+
+---
+
+## 📋 Ordre d'exécution recommandé
+
+---
+
 ### ~~TÂCHE 1~~ — ✅ DONE — Supprimer les mock tickets, tout depuis Supabase
 **Problème :** L'app affiche des tickets fictifs depuis `mock-data/tickets.ts` via `ticketStore` (localStorage). La base de données Supabase est vide de tickets mais l'app les ignore.
 
@@ -316,6 +535,19 @@ CREATE POLICY "ticket_photos_upload" ON storage.objects FOR INSERT
 - Si le ticket est référé, les photos de référencement sont incluses
 
 ---
+
+### ~~BUGS session juillet 2026~~ — ✅ DONE — Tests et corrections
+
+- [x] **BUG-1 — EEP ne voit pas ses tickets** : `user.sector` était `undefined`. Fix : `useAuth.ts` dérive maintenant le nom de secteur dynamiquement depuis `useDutyStore().sectors` via `user.sectorId`. Plus jamais hardcodé.
+- [x] **BUG-2 — sector_id null dans les tickets créés** : `NewTicketScreen` ne passait que le nom du secteur. Fix : le select secteur utilise maintenant l'id comme valeur, `sectorId` est passé à `addTicket()`, qui l'insère dans `sector_id` en base.
+- [x] **BUG-3 — Dropdown Planning de Garde inutilisable** : La liste d'agents venait de `DUTY_SCHEDULE` mock (IDs `eep-1`...`eep-8`). Fix : `DutyScheduleScreen` utilise maintenant `useEPEmployees()` → `useEmployeeStore`, retourne les vrais employés depuis la DB.
+- [x] **BUG-4 — Comptes fantômes** : Mohammed Alami (eep-1), Yasmine Benali (coord-1), Directeur El Ahmadi (obs-1) n'avaient pas d'entrée dans `employees`. Fix : ajoutés comme `emp-16`, `emp-17`, `emp-18` dans `seed.sql` et `MOCK_EMPLOYEES`, liés dans `user_accounts`.
+- [x] **BUG-5 — Dashboards affichaient des agents mock** : CGRDashboard, CoordinatorDashboard, ObserverDashboard, ObserverDutySchedule utilisaient tous `useDutyStore().agents` (données mock). Fix : nouveau hook `useCurrentDuty()` qui dérive les agents de garde depuis `duty_schedule + employees` (vraies données DB).
+- [x] **CLEAN — Suppression MOCK_NOTIFICATIONS** : Les 4 écrans de notifications (CGR, EEP, SED, Coordinator) utilisaient `MOCK_NOTIFICATIONS`. Remplacés par `useNotificationStore` qui lit depuis Supabase avec fallback sur les mocks.
+
+**Actions manuelles requises après ces fixes :**
+1. Exécuter dans Supabase SQL Editor les nouvelles lignes de `seed.sql` (emp-16, emp-17, emp-18 + mise à jour user_accounts)
+2. Vider le localStorage du navigateur (DevTools → Application → Local Storage → Clear) pour forcer un rechargement depuis Supabase
 
 ## 📋 Ordre d'exécution recommandé
 

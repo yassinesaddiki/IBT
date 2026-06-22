@@ -7,6 +7,7 @@ import { COLORS } from '../../design-system/tokens'
 import { useDutyStore } from '../../store/dutyStore'
 import { useEmployeeStore } from '../../store/employeeStore'
 import { EmployeeChip } from '../../shared/components/EmployeeChip'
+import { useEPEmployees, getWeekStart } from '../../shared/hooks/useDutyAgents'
 
 // Generate 4 weeks starting from current week
 function getWeeks(): { label: string; range: string; start: Date }[] {
@@ -36,13 +37,12 @@ export function DutyScheduleScreen() {
   const [saved,   setSaved]   = useState(false)
   const [saving,  setSaving]  = useState(false)
 
-  const { agents, sectors, setSlotAgent: storeSetSlot, getSlotAgent: storeGetSlot } = useDutyStore()
-  const employees = useEmployeeStore((s) => s.employees)
+  const { sectors, setSlotAgent: storeSetSlot, getSlotAgent: storeGetSlot } = useDutyStore()
+  const employees    = useEmployeeStore((s) => s.employees)
+  const epEmployees  = useEPEmployees()   // only active EP agents — from DB, not mock
 
-  const week = weeks[weekIdx]
-
-  // Compute the ISO week-start (Monday) string for the selected week
-  const weekStart = week.start.toISOString().slice(0, 10)
+  const week     = weeks[weekIdx]
+  const weekStart = getWeekStart(week.start)
 
   const getSlotAgent = (sectorId: string, slotIdx: number): string =>
     storeGetSlot(weekStart, sectorId, slotIdx)
@@ -156,9 +156,10 @@ export function DutyScheduleScreen() {
 
               {/* Agent slots */}
               {[0, 1].map((slotIdx) => {
-                const currentId    = getSlotAgent(sector.id, slotIdx)
-                const currentAgent = agents.find((a) => a.id === currentId)
-                const isEmpty      = !currentId
+                const currentId  = getSlotAgent(sector.id, slotIdx)
+                const currentEmp = epEmployees.find((e) => e.id === currentId)
+                  ?? employees.find((e) => e.id === currentId) // fallback: any employee
+                const isEmpty    = !currentId
 
                 return (
                   <div key={slotIdx} style={{ marginBottom: slotIdx === 0 ? '12px' : 0 }}>
@@ -171,23 +172,20 @@ export function DutyScheduleScreen() {
                       borderRadius: '10px', padding: '10px 12px',
                     }}>
                       {/* Current agent preview */}
-                      {currentAgent && (() => {
-                        const emp = employees.find((e) => e.name === currentAgent.name)
-                        return (
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
-                            <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: COLORS.semantic.info.bg, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px', fontWeight: 500, color: COLORS.semantic.info.text, flexShrink: 0 }}>
-                              {currentAgent.initials}
-                            </div>
-                            <div style={{ flex: 1 }}>
-                              <EmployeeChip empId={emp?.id} name={currentAgent.name} matricule={emp?.matricule} variant="block" />
-                              <div style={{ fontSize: '11px', color: COLORS.text.secondary, marginTop: '1px' }}>{currentAgent.phone}</div>
-                            </div>
-                            <span style={{ width: '7px', height: '7px', borderRadius: '50%', background: currentAgent.online ? COLORS.brand.green : COLORS.text.muted, flexShrink: 0 }} />
+                      {currentEmp && (
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+                          <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: COLORS.semantic.info.bg, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px', fontWeight: 500, color: COLORS.semantic.info.text, flexShrink: 0 }}>
+                            {currentEmp.initials}
                           </div>
-                        )
-                      })()}
+                          <div style={{ flex: 1 }}>
+                            <EmployeeChip empId={currentEmp.id} name={currentEmp.name} matricule={currentEmp.matricule} variant="block" />
+                            <div style={{ fontSize: '11px', color: COLORS.text.secondary, marginTop: '1px' }}>{currentEmp.phone}</div>
+                          </div>
+                          <span style={{ width: '7px', height: '7px', borderRadius: '50%', background: COLORS.brand.green, flexShrink: 0 }} />
+                        </div>
+                      )}
 
-                      {/* Dropdown to change */}
+                      {/* Dropdown — populated from real DB employees */}
                       <select
                         value={currentId}
                         onChange={(e) => setSlotAgent(sector.id, slotIdx, e.target.value)}
@@ -201,9 +199,11 @@ export function DutyScheduleScreen() {
                         }}
                       >
                         <option value="">— Sélectionner un agent —</option>
-                        <optgroup label="Agents disponibles">
-                          {agents.map((a) => (
-                            <option key={a.id} value={a.id}>{a.name} ({a.sector})</option>
+                        <optgroup label="Équipe de Permanance — actifs">
+                          {epEmployees.map((e) => (
+                            <option key={e.id} value={e.id}>
+                              {e.name} · {e.matricule}{e.sector ? ` (${e.sector})` : ''}
+                            </option>
                           ))}
                         </optgroup>
                       </select>
@@ -223,15 +223,17 @@ export function DutyScheduleScreen() {
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '12px' }} className="schedule-grid">
             {sectors.map((sector) => {
-              const a0 = agents.find((a) => a.id === getSlotAgent(sector.id, 0))
-              const a1 = agents.find((a) => a.id === getSlotAgent(sector.id, 1))
+              const resolve = (id: string) =>
+                employees.find((e) => e.id === id)
+              const e0 = resolve(getSlotAgent(sector.id, 0))
+              const e1 = resolve(getSlotAgent(sector.id, 1))
               return (
                 <div key={sector.id} style={{ background: COLORS.bg.page, borderRadius: '10px', padding: '12px' }}>
                   <div style={{ fontSize: '11px', fontWeight: 500, color: COLORS.text.secondary, textTransform: 'uppercase', letterSpacing: '.05em', marginBottom: '8px' }}>{sector.name}</div>
-                  {[a0, a1].map((a, i) => a ? (
+                  {[e0, e1].map((e, i) => e ? (
                     <div key={i} style={{ fontSize: '12px', color: COLORS.text.primary, marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '6px' }}>
                       <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: COLORS.brand.green, flexShrink: 0 }} />
-                      {a.name}
+                      {e.name} <span style={{ color: COLORS.text.muted, fontFamily: 'monospace', fontSize: '10px' }}>{e.matricule}</span>
                     </div>
                   ) : (
                     <div key={i} style={{ fontSize: '12px', color: '#EF4444', marginBottom: '4px' }}>⚠ Non assigné</div>

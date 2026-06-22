@@ -51,7 +51,8 @@ export interface Ticket {
   contractNumber: string
   phone: string
   address: string
-  sector: string
+  sector: string      // sector name (denormalized)
+  sectorId?: string   // sector id reference
   category: string
   subCategory: string
   severity: Severity

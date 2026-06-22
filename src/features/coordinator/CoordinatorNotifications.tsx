@@ -1,10 +1,10 @@
-import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { IconBell, IconBellOff, IconTicket } from '@tabler/icons-react'
 import { NavBar } from '../../shared/components/NavBar'
 import { SubNav } from '../../shared/components/SubNav'
 import { COLORS } from '../../design-system/tokens'
-import { MOCK_NOTIFICATIONS } from '../../mock-data/notifications'
+import { useNotificationStore } from '../../store/notificationStore'
+import { useAuthStore } from '../../store/authStore'
 import { COORDINATOR_NAV } from './coordinatorNav'
 import { useTickets } from '../../shared/hooks/useTickets'
 
@@ -18,13 +18,10 @@ const TYPE_STYLE = {
 export function CoordinatorNotifications() {
   const { tickets } = useTickets()
   const navigate    = useNavigate()
-  const coord       = MOCK_NOTIFICATIONS.filter((n) => n.roles.includes('coordinator'))
-  const [items, setItems] = useState(coord)
-  const pendingApproval   = tickets.filter((t) => t.status === 'attente-approbation').length
-  const unread            = items.filter((n) => !n.read).length
-
-  const markAllRead = () => setItems((p) => p.map((n) => ({ ...n, read: true })))
-  const markRead    = (id: string) => setItems((p) => p.map((n) => n.id === id ? { ...n, read: true } : n))
+  const user        = useAuthStore((s) => s.user)
+  const { notifications: items, markRead, markAllRead } = useNotificationStore()
+  const pendingApproval = tickets.filter((t) => t.status === 'attente-approbation').length
+  const unread          = items.filter((n) => !n.read).length
 
   return (
     <div style={{ maxWidth: '1380px', margin: '0 auto', padding: '20px 20px 40px' }}>
@@ -45,7 +42,7 @@ export function CoordinatorNotifications() {
             <div style={{ fontSize: '13px', color: COLORS.text.secondary, marginTop: '4px' }}>Approbations, mises à jour tickets, alertes système</div>
           </div>
           {unread > 0 && (
-            <button onClick={markAllRead} style={{ height: '34px', background: COLORS.bg.surface, color: COLORS.text.secondary, border: `0.5px solid ${COLORS.border.strong}`, borderRadius: '8px', fontSize: '12px', cursor: 'pointer', padding: '0 14px', fontFamily: 'inherit' }}>
+            <button onClick={() => markAllRead(user?.id ?? '')} style={{ height: '34px', background: COLORS.bg.surface, color: COLORS.text.secondary, border: `0.5px solid ${COLORS.border.strong}`, borderRadius: '8px', fontSize: '12px', cursor: 'pointer', padding: '0 14px', fontFamily: 'inherit' }}>
               Tout marquer comme lu
             </button>
           )}

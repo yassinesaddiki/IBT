@@ -5,9 +5,8 @@ import { NavBar } from '../../shared/components/NavBar'
 import { SubNav } from '../../shared/components/SubNav'
 import { OBSERVER_NAV } from '../coordinator/coordinatorNav'
 import { COLORS } from '../../design-system/tokens'
-import { useDutyStore } from '../../store/dutyStore'
-import { useEmployeeStore } from '../../store/employeeStore'
 import { EmployeeChip } from '../../shared/components/EmployeeChip'
+import { useCurrentDuty } from '../../shared/hooks/useDutyAgents'
 
 function getWeeks(): { label: string; range: string; weekNum: number }[] {
   const today = new Date()
@@ -34,11 +33,9 @@ export function ObserverDutySchedule() {
   const weeks      = getWeeks()
   const [weekIdx, setWeekIdx] = useState(0)
   const week       = weeks[weekIdx]
-  const dutyAgents = useDutyStore((s) => s.agents)
-  const sectors    = useDutyStore((s) => s.sectors).filter((s) => s.status === 'actif')
-  const employees  = useEmployeeStore((s) => s.employees)
-
-  const onlineCount = dutyAgents.filter((a) => a.online).length
+  const currentDuty = useCurrentDuty()
+  const allAgents   = currentDuty.flatMap((sd) => sd.agents)
+  const onlineCount = allAgents.length  // all scheduled agents are considered active
 
   return (
     <div style={{ maxWidth: '1380px', margin: '0 auto', padding: '20px 20px 40px' }}>
@@ -58,7 +55,7 @@ export function ObserverDutySchedule() {
           <div>
             <div style={{ fontSize: '20px', fontWeight: 500, color: COLORS.text.primary }}>Planning de Garde</div>
             <div style={{ fontSize: '13px', color: COLORS.text.secondary, marginTop: '4px' }}>
-              {onlineCount} agents en ligne actuellement · {dutyAgents.length} agents de garde
+              {onlineCount} agents de garde · {currentDuty.length} secteurs actifs
             </div>
           </div>
           <button
@@ -92,65 +89,47 @@ export function ObserverDutySchedule() {
 
         {/* Quick stats row */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '12px', marginBottom: '20px' }} className="obs-schedule-kpi">
-          {sectors.map((sector) => {
-            const agents = dutyAgents.filter((a) => a.sectorId === sector.id)
-            const online = agents.filter((a) => a.online).length
-            const totalTickets = agents.reduce((sum, a) => sum + a.activeTickets, 0)
-            return (
-              <div key={sector.id} className="animate-up" style={{ background: COLORS.bg.surface, borderRadius: '12px', border: `0.5px solid ${COLORS.border.default}`, padding: '14px 16px' }}>
-                <div style={{ fontSize: '11px', color: COLORS.text.muted, marginBottom: '4px', textTransform: 'uppercase', letterSpacing: '.05em' }}>{sector.name}</div>
-                <div style={{ fontSize: '20px', fontWeight: 500, color: COLORS.text.primary, marginBottom: '4px' }}>{agents.length} agents</div>
-                <div style={{ fontSize: '11px', color: COLORS.text.secondary, display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                    <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: COLORS.brand.green }} />
-                    {online} en ligne
-                  </span>
-                  · {totalTickets} tickets actifs
-                </div>
+          {currentDuty.map((sd) => (
+            <div key={sd.sectorId} className="animate-up" style={{ background: COLORS.bg.surface, borderRadius: '12px', border: `0.5px solid ${COLORS.border.default}`, padding: '14px 16px' }}>
+              <div style={{ fontSize: '11px', color: COLORS.text.muted, marginBottom: '4px', textTransform: 'uppercase', letterSpacing: '.05em' }}>{sd.sectorName}</div>
+              <div style={{ fontSize: '20px', fontWeight: 500, color: COLORS.text.primary, marginBottom: '4px' }}>{sd.agents.length} agents</div>
+              <div style={{ fontSize: '11px', color: COLORS.text.secondary, display: 'flex', alignItems: 'center', gap: '4px' }}>
+                <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: COLORS.brand.green }} />
+                {sd.agents.length} actifs
               </div>
-            )
-          })}
+            </div>
+          ))}
         </div>
 
         {/* Sector cards grid */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '16px' }} className="obs-schedule-grid">
-          {sectors.map((sector) => {
-            const agents = dutyAgents.filter((a) => a.sectorId === sector.id)
-            return (
-              <div key={sector.id} className="animate-up" style={{ background: COLORS.bg.surface, borderRadius: '14px', border: `0.5px solid ${COLORS.border.default}`, padding: '20px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px', paddingBottom: '12px', borderBottom: `0.5px solid ${COLORS.border.default}` }}>
-                  <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: COLORS.brand.green }} />
-                  <div style={{ fontSize: '15px', fontWeight: 500, color: COLORS.text.primary }}>{sector.name}</div>
-                  <span style={{ marginLeft: 'auto', fontSize: '11px', color: COLORS.text.muted }}>{week.label}</span>
-                </div>
-
-                {agents.map((agent) => {
-                  const emp = employees.find((e) => e.name === agent.name)
-                  return (
-                  <div key={agent.id} style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '10px', background: COLORS.bg.page, borderRadius: '10px', marginBottom: '10px' }}>
-                    <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: COLORS.semantic.info.bg, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', fontWeight: 500, color: COLORS.semantic.info.text, flexShrink: 0 }}>
-                      {agent.initials}
-                    </div>
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <EmployeeChip empId={emp?.id} name={agent.name} matricule={emp?.matricule} variant="block" />
-                      <div style={{ fontSize: '11px', color: COLORS.text.secondary, marginTop: '2px' }}>
-                        {agent.activeTickets} ticket{agent.activeTickets !== 1 ? 's' : ''} actif{agent.activeTickets !== 1 ? 's' : ''} · {agent.closedThisWeek} fermés cette semaine
-                      </div>
-                    </div>
-                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '6px' }}>
-                      <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: agent.online ? COLORS.brand.green : COLORS.text.muted }} />
-                      <a
-                        href={`tel:${agent.phone}`}
-                        style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', fontSize: '11px', color: COLORS.brand.blue, textDecoration: 'none', background: COLORS.semantic.info.bg, padding: '3px 8px', borderRadius: '20px', fontWeight: 500 }}
-                      >
-                        <IconPhone size={11} /> {agent.phone}
-                      </a>
-                    </div>
-                  </div>
-                )})}
+          {currentDuty.map((sd) => (
+            <div key={sd.sectorId} className="animate-up" style={{ background: COLORS.bg.surface, borderRadius: '14px', border: `0.5px solid ${COLORS.border.default}`, padding: '20px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px', paddingBottom: '12px', borderBottom: `0.5px solid ${COLORS.border.default}` }}>
+                <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: COLORS.brand.green }} />
+                <div style={{ fontSize: '15px', fontWeight: 500, color: COLORS.text.primary }}>{sd.sectorName}</div>
+                <span style={{ marginLeft: 'auto', fontSize: '11px', color: COLORS.text.muted }}>{week.label}</span>
               </div>
-            )
-          })}
+              {sd.agents.length === 0 && <div style={{ fontSize: '12px', color: COLORS.text.muted, fontStyle: 'italic' }}>Aucun agent assigné cette semaine</div>}
+              {sd.agents.map(({ employee: emp }) => (
+                <div key={emp.id} style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '10px', background: COLORS.bg.page, borderRadius: '10px', marginBottom: '10px' }}>
+                  <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: COLORS.semantic.info.bg, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', fontWeight: 500, color: COLORS.semantic.info.text, flexShrink: 0 }}>
+                    {emp.initials}
+                  </div>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <EmployeeChip empId={emp.id} name={emp.name} matricule={emp.matricule} variant="block" />
+                    <div style={{ fontSize: '11px', color: COLORS.text.secondary, marginTop: '2px' }}>{emp.sector}</div>
+                  </div>
+                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '6px' }}>
+                    <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: COLORS.brand.green }} />
+                    <a href={`tel:${emp.phone}`} style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', fontSize: '11px', color: COLORS.brand.blue, textDecoration: 'none', background: COLORS.semantic.info.bg, padding: '3px 8px', borderRadius: '20px', fontWeight: 500 }}>
+                      <IconPhone size={11} /> {emp.phone}
+                    </a>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ))}
         </div>
 
         {/* Full list */}
@@ -168,32 +147,30 @@ export function ObserverDutySchedule() {
                 </tr>
               </thead>
               <tbody>
-                {dutyAgents.map((agent) => {
-                  const emp = employees.find((e) => e.name === agent.name)
-                  return (
-                  <tr key={agent.id} style={{ borderBottom: `0.5px solid #F5F5F5` }}>
+                {allAgents.map(({ employee: emp, slotIndex }) => (
+                  <tr key={`${emp.id}-${slotIndex}`} style={{ borderBottom: `0.5px solid #F5F5F5` }}>
                     <td style={{ padding: '12px 14px' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                         <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: COLORS.semantic.info.bg, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '11px', fontWeight: 500, color: COLORS.semantic.info.text, flexShrink: 0 }}>
-                          {agent.initials}
+                          {emp.initials}
                         </div>
-                        <EmployeeChip empId={emp?.id} name={agent.name} matricule={emp?.matricule} variant="block" />
+                        <EmployeeChip empId={emp.id} name={emp.name} matricule={emp.matricule} variant="block" />
                       </div>
                     </td>
-                    <td style={{ padding: '12px 8px', fontSize: '13px', color: COLORS.text.secondary }}>{agent.sector}</td>
+                    <td style={{ padding: '12px 8px', fontSize: '13px', color: COLORS.text.secondary }}>{emp.sector ?? '—'}</td>
                     <td style={{ padding: '12px 8px' }}>
-                      <a href={`tel:${agent.phone}`} style={{ fontSize: '12px', color: COLORS.brand.blue, textDecoration: 'none', fontFamily: 'monospace' }}>{agent.phone}</a>
+                      <a href={`tel:${emp.phone}`} style={{ fontSize: '12px', color: COLORS.brand.blue, textDecoration: 'none', fontFamily: 'monospace' }}>{emp.phone}</a>
                     </td>
-                    <td style={{ padding: '12px 8px', fontSize: '13px', color: COLORS.text.primary, fontWeight: 500 }}>{agent.activeTickets}</td>
-                    <td style={{ padding: '12px 8px', fontSize: '13px', color: COLORS.semantic.success.text }}>{agent.closedThisWeek}</td>
+                    <td style={{ padding: '12px 8px', fontSize: '13px', color: COLORS.text.primary, fontWeight: 500 }}>—</td>
+                    <td style={{ padding: '12px 8px', fontSize: '13px', color: COLORS.semantic.success.text }}>—</td>
                     <td style={{ padding: '12px 8px' }}>
-                      <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', fontSize: '11px', fontWeight: 500, padding: '3px 8px', borderRadius: '20px', background: agent.online ? COLORS.semantic.success.bg : COLORS.bg.page, color: agent.online ? COLORS.semantic.success.text : COLORS.text.muted, border: `0.5px solid ${agent.online ? '#BBF7D0' : COLORS.border.default}` }}>
-                        <span style={{ width: '5px', height: '5px', borderRadius: '50%', background: agent.online ? COLORS.brand.green : COLORS.text.muted }} />
-                        {agent.online ? 'En ligne' : 'Hors ligne'}
+                      <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', fontSize: '11px', fontWeight: 500, padding: '3px 8px', borderRadius: '20px', background: COLORS.semantic.success.bg, color: COLORS.semantic.success.text, border: `0.5px solid #BBF7D0` }}>
+                        <span style={{ width: '5px', height: '5px', borderRadius: '50%', background: COLORS.brand.green }} />
+                        En service
                       </span>
                     </td>
                   </tr>
-                )})}
+                ))}
               </tbody>
             </table>
           </div>

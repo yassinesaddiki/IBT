@@ -1,9 +1,8 @@
-import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { IconBellOff, IconTicket } from '@tabler/icons-react'
 import { MobileLayout } from '../../shared/components/MobileLayout'
 import { COLORS } from '../../design-system/tokens'
-import { MOCK_NOTIFICATIONS } from '../../mock-data/notifications'
+import { useNotificationStore } from '../../store/notificationStore'
 
 const TYPE_DOT: Record<string, string> = {
   info: COLORS.brand.blue, success: COLORS.brand.green, warning: '#F97316', danger: '#EF4444',
@@ -17,11 +16,8 @@ const TYPE_TEXT: Record<string, string> = {
 
 export function SEDNotifications() {
   const navigate = useNavigate()
-  const sed = MOCK_NOTIFICATIONS.filter((n) => n.roles.includes('sed'))
-  const [items, setItems] = useState(sed)
+  const { notifications: items, markRead } = useNotificationStore()
   const unread = items.filter((n) => !n.read).length
-
-  const markRead = (id: string) => setItems((prev) => prev.map((n) => n.id === id ? { ...n, read: true } : n))
 
   return (
     <MobileLayout title={`Notifications${unread > 0 ? ` (${unread})` : ''}`}>

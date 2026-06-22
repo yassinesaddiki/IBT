@@ -3,6 +3,7 @@ import { IconBolt, IconBell, IconTicket, IconClock, IconCircleCheck, IconChevron
 import { COLORS } from '../../design-system/tokens'
 import { useAuth } from '../../shared/hooks/useAuth'
 import { useTickets } from '../../shared/hooks/useTickets'
+import { useDutyStore } from '../../store/dutyStore'
 import { StatusBadge } from '../../design-system/components/Badge'
 import { SeverityBadge } from '../../design-system/components/Badge'
 import { formatElapsed } from '../../shared/utils/formatDate'
@@ -11,12 +12,17 @@ export function EEPDashboard() {
   const { user, logout } = useAuth()
   const { tickets }      = useTickets()
   const navigate         = useNavigate()
+  const sectors          = useDutyStore((s) => s.sectors)
 
-  const myTickets = tickets.filter((t) =>
-    t.sector === user?.sector &&
-    t.status !== 'ferme' &&
-    t.status !== 'resolu-sed'
-  )
+  // Match by sectorId (reliable) OR sector name (fallback for tickets created before fix)
+  const mySectorName = user?.sector
+  const mySectorId   = user?.sectorId
+  const myTickets = tickets.filter((t) => {
+    const matchById   = mySectorId && (t.sectorId === mySectorId)
+    const matchByName = mySectorName && (t.sector === mySectorName)
+    return (matchById || matchByName) && t.status !== 'ferme' && t.status !== 'resolu-sed'
+  })
+  void sectors // used indirectly via useAuth sector derivation
 
   const stats = {
     total:    myTickets.length,

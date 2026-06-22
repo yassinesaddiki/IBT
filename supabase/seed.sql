@@ -72,18 +72,22 @@ INSERT INTO employees (id, name, initials, role, sector_id, phone, email, matric
   ('emp-12', 'Mourad Filali',      'MF', 'sed', NULL,  '0666-345-678', 'm.filali@onee.ma',    '20003C', 'v-6', 'actif',   '2019-12-03'),
   ('emp-13', 'Soufiane Hajji',     'SH', 'sed', NULL,  '0666-456-789', 's.hajji@onee.ma',     '20004D', NULL,  'inactif', '2020-06-15'),
   -- CGR
-  ('emp-14', 'Amina Kettani',      'AK', 'cgr', NULL,  '0667-567-890', 'a.kettani@onee.ma',   '30001A', NULL,  'actif',   '2018-03-01'),
-  ('emp-15', 'Sanae Moukhliss',    'SM', 'cgr', NULL,  '0667-678-901', 's.moukhliss@onee.ma', '30002B', NULL,  'actif',   '2020-10-12')
+  ('emp-14', 'Amina Kettani',      'AK', 'cgr',         NULL,  '0667-567-890', 'a.kettani@onee.ma',   '30001A', NULL, 'actif',   '2018-03-01'),
+  ('emp-15', 'Sanae Moukhliss',    'SM', 'cgr',         NULL,  '0667-678-901', 's.moukhliss@onee.ma', '30002B', NULL, 'actif',   '2020-10-12'),
+  -- Comptes login (liés aux user_accounts)
+  ('emp-16', 'Mohammed Alami',     'MA', 'eep',         's-1', '0661-999-001', 'm.alami@onee.ma',     '10016A', NULL, 'actif',   '2023-01-01'),
+  ('emp-17', 'Yasmine Benali',     'YB', 'coordinator', NULL,  '0668-100-001', 'y.benali@onee.ma',    '40001A', NULL, 'actif',   '2017-01-01'),
+  ('emp-18', 'Directeur El Ahmadi','DA', 'observer',    NULL,  '0668-200-001', 'd.elahmadi@onee.ma',  '50001A', NULL, 'actif',   '2010-01-01')
 ON CONFLICT (id) DO NOTHING;
 
 
 -- ── USER ACCOUNTS ────────────────────────────────────────────
 INSERT INTO user_accounts (id, name, role, username, password, sector_id, employee_id, active) VALUES
-  ('cgr-1',   'Amina Kettani',    'cgr',         'cgr123',   'cgr123',   NULL,  'emp-14', TRUE),
-  ('eep-1',   'Mohammed Alami',   'eep',         'eep123',   'eep123',   's-1', NULL,     TRUE),
-  ('sed-1',   'Hassan Chraibi',   'sed',         'sed123',   'sed123',   NULL,  'emp-10', TRUE),
-  ('coord-1', 'Yasmine Benali',   'coordinator', 'coord123', 'coord123', NULL,  NULL,     TRUE),
-  ('obs-1',   'directeur el ahmadi',   'observer',    'obs123',   'obs123',   NULL,  NULL,     TRUE)
+  ('cgr-1',   'Amina Kettani',       'cgr',         'cgr123',   'cgr123',   NULL,  'emp-14', TRUE),
+  ('eep-1',   'Mohammed Alami',      'eep',         'eep123',   'eep123',   's-1', 'emp-16', TRUE),
+  ('sed-1',   'Hassan Chraibi',      'sed',         'sed123',   'sed123',   NULL,  'emp-10', TRUE),
+  ('coord-1', 'Yasmine Benali',      'coordinator', 'coord123', 'coord123', NULL,  'emp-17', TRUE),
+  ('obs-1',   'Directeur El Ahmadi', 'observer',    'obs123',   'obs123',   NULL,  'emp-18', TRUE)
 ON CONFLICT (id) DO NOTHING;
 
 

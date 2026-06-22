@@ -39,8 +39,12 @@ export const MOCK_EMPLOYEES: Employee[] = [
   { id: 'emp-12', name: 'Mourad Filali',        initials: 'MF', role: 'sed', phone: '0666-345-678', email: 'm.filali@onee.ma',    matricule: '20003C', vehicleId: 'v-6', status: 'actif',   joinedDate: '2019-12-03', activeTickets: 0 },
   { id: 'emp-13', name: 'Soufiane Hajji',       initials: 'SH', role: 'sed', phone: '0666-456-789', email: 's.hajji@onee.ma',     matricule: '20004D', status: 'inactif', joinedDate: '2020-06-15', activeTickets: 0 },
   // CGR
-  { id: 'emp-14', name: 'Amina Kettani',        initials: 'AK', role: 'cgr', phone: '0667-567-890', email: 'a.kettani@onee.ma',   matricule: '30001A', status: 'actif',   joinedDate: '2018-03-01', activeTickets: 0 },
-  { id: 'emp-15', name: 'Sanae Moukhliss',      initials: 'SM', role: 'cgr', phone: '0667-678-901', email: 's.moukhliss@onee.ma', matricule: '30002B', status: 'actif',   joinedDate: '2020-10-12', activeTickets: 0 },
+  { id: 'emp-14', name: 'Amina Kettani',        initials: 'AK', role: 'cgr',         phone: '0667-567-890', email: 'a.kettani@onee.ma',   matricule: '30001A', status: 'actif',   joinedDate: '2018-03-01', activeTickets: 0 },
+  { id: 'emp-15', name: 'Sanae Moukhliss',      initials: 'SM', role: 'cgr',         phone: '0667-678-901', email: 's.moukhliss@onee.ma', matricule: '30002B', status: 'actif',   joinedDate: '2020-10-12', activeTickets: 0 },
+  // Comptes login — liés aux user_accounts
+  { id: 'emp-16', name: 'Mohammed Alami',       initials: 'MA', role: 'eep',         sectorId: 's-1', sector: 'Oud Nachif', phone: '0661-999-001', email: 'm.alami@onee.ma',    matricule: '10016A', status: 'actif',   joinedDate: '2023-01-01', activeTickets: 0 },
+  { id: 'emp-17', name: 'Yasmine Benali',       initials: 'YB', role: 'coordinator', phone: '0668-100-001', email: 'y.benali@onee.ma',   matricule: '40001A', status: 'actif',   joinedDate: '2017-01-01', activeTickets: 0 },
+  { id: 'emp-18', name: 'Directeur El Ahmadi',  initials: 'DA', role: 'observer',    phone: '0668-200-001', email: 'd.elahmadi@onee.ma', matricule: '50001A', status: 'actif',   joinedDate: '2010-01-01', activeTickets: 0 },
 ]
 
 export const ROLE_LABELS_FR: Record<EmployeeRole, string> = {

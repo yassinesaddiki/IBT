@@ -28,7 +28,8 @@ export function NewTicketScreen() {
   const [contractNumber,  setContractNumber]  = useState('')
   const [phone,           setPhone]           = useState('')
   const [address,         setAddress]         = useState('')
-  const [sector,          setSector]          = useState('')
+  const [sectorId,        setSectorId]        = useState('')   // DB sector id
+  const [sector,          setSector]          = useState('')   // sector name (for display)
 
   // Problem info
   const [categoryId,    setCategoryId]    = useState('')
@@ -61,7 +62,7 @@ export function NewTicketScreen() {
     if (!contractNumber.trim()) e.contractNumber  = 'Requis'
     if (!phone.trim())          e.phone           = 'Requis'
     if (!address.trim())        e.address         = 'Requis'
-    if (!sector)                e.sector          = 'Requis'
+    if (!sectorId)              e.sector          = 'Requis'
     if (!categoryId)            e.category        = 'Requis'
     if (!subCategoryId)         e.subCategory     = 'Requis'
     if (!severity)              e.severity        = 'Requis'
@@ -78,7 +79,8 @@ export function NewTicketScreen() {
         contractNumber,
         phone,
         address,
-        sector,
+        sector,        // sector_name in DB
+        sectorId,      // sector_id in DB
         category:          selectedCategory?.label ?? '',
         subCategory:       selectedSub?.label ?? '',
         severity:          severity as Severity,
@@ -148,9 +150,12 @@ export function NewTicketScreen() {
             </FormField>
             <FormField label="Secteur" error={errors.sector} required>
               <SelectInput
-                value={sector}
-                onChange={setSector}
-                options={activeSectors.map((s) => ({ value: s.name, label: s.name }))}
+                value={sectorId}
+                onChange={(val) => {
+                  setSectorId(val)
+                  setSector(activeSectors.find((s) => s.id === val)?.name ?? '')
+                }}
+                options={activeSectors.map((s) => ({ value: s.id, label: s.name }))}
                 placeholder="Sélectionner un secteur"
                 error={!!errors.sector}
               />

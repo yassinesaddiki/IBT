@@ -8,23 +8,21 @@ import { SeverityBadge } from '../../design-system/components/Badge'
 import { Card } from '../../design-system/components/Card'
 import { COLORS } from '../../design-system/tokens'
 import { useTickets } from '../../shared/hooks/useTickets'
-import { useDutyStore } from '../../store/dutyStore'
-import { useEmployeeStore } from '../../store/employeeStore'
 import { EmployeeChip } from '../../shared/components/EmployeeChip'
+import { useCurrentDuty } from '../../shared/hooks/useDutyAgents'
 import { formatElapsed } from '../../shared/utils/formatDate'
 
 export function ObserverDashboard() {
   const { tickets }  = useTickets()
   const navigate     = useNavigate()
-  const dutyAgents   = useDutyStore((s) => s.agents)
-  const sectors      = useDutyStore((s) => s.sectors)
-  const employees    = useEmployeeStore((s) => s.employees)
+  const currentDuty     = useCurrentDuty()
+  const totalDutyAgents = currentDuty.reduce((n, sd) => n + sd.agents.length, 0)
 
   const kpi = {
     total:   tickets.length,
     ouverts: tickets.filter((t) => t.status !== 'ferme').length,
     fermes:  tickets.filter((t) => t.status === 'ferme').length,
-    agents:  dutyAgents.length,
+    agents:  totalDutyAgents,
   }
 
   return (
@@ -93,24 +91,22 @@ export function ObserverDashboard() {
           <aside style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
             <Card>
               <div style={{ fontSize: '14px', fontWeight: 500, color: COLORS.text.primary, marginBottom: '14px' }}>Planning de garde — Semaine 25</div>
-              {sectors.filter((s) => s.status === 'actif').map((sector) => (
-                <div key={sector.id} style={{ marginBottom: '14px' }}>
-                  <div style={{ fontSize: '11px', fontWeight: 500, color: COLORS.text.secondary, textTransform: 'uppercase', letterSpacing: '.05em', marginBottom: '8px' }}>{sector.name}</div>
-                  {dutyAgents.filter((a) => a.sectorId === sector.id).map((agent) => {
-                    const emp = employees.find((e) => e.name === agent.name)
-                    return (
-                      <div key={agent.id} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '7px 8px', background: COLORS.bg.panel, borderRadius: '8px', marginBottom: '5px' }}>
-                        <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: COLORS.semantic.info.bg, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px', fontWeight: 500, color: COLORS.semantic.info.text, flexShrink: 0 }}>
-                          {agent.initials}
-                        </div>
-                        <div style={{ flex: 1, minWidth: 0 }}>
-                          <EmployeeChip empId={emp?.id} name={agent.name} matricule={emp?.matricule} variant="block" />
-                          <div style={{ fontSize: '10px', color: COLORS.text.secondary, marginTop: '1px' }}>{agent.phone}</div>
-                        </div>
-                        <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: agent.online ? COLORS.brand.green : COLORS.text.muted, flexShrink: 0 }} />
+              {currentDuty.map((sd) => (
+                <div key={sd.sectorId} style={{ marginBottom: '14px' }}>
+                  <div style={{ fontSize: '11px', fontWeight: 500, color: COLORS.text.secondary, textTransform: 'uppercase', letterSpacing: '.05em', marginBottom: '8px' }}>{sd.sectorName}</div>
+                  {sd.agents.length === 0 && <div style={{ fontSize: '11px', color: COLORS.text.muted, fontStyle: 'italic' }}>Aucun agent assigné</div>}
+                  {sd.agents.map(({ employee: emp }) => (
+                    <div key={emp.id} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '7px 8px', background: COLORS.bg.panel, borderRadius: '8px', marginBottom: '5px' }}>
+                      <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: COLORS.semantic.info.bg, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px', fontWeight: 500, color: COLORS.semantic.info.text, flexShrink: 0 }}>
+                        {emp.initials}
                       </div>
-                    )
-                  })}
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <EmployeeChip empId={emp.id} name={emp.name} matricule={emp.matricule} variant="block" />
+                        <div style={{ fontSize: '10px', color: COLORS.text.secondary, marginTop: '1px' }}>{emp.phone}</div>
+                      </div>
+                      <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: COLORS.brand.green, flexShrink: 0 }} />
+                    </div>
+                  ))}
                 </div>
               ))}
             </Card>
