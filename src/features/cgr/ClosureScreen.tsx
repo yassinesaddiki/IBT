@@ -55,7 +55,7 @@ export function ClosureScreen() {
   if (!ticket) {
     return (
       <div style={{ maxWidth: '1380px', margin: '0 auto', padding: '20px' }}>
-        <NavBar title="Centre de Gestion des Réclamations" notifCount={3} />
+        <NavBar title="Centre de Gestion des Réclamations" />
         <div style={{ textAlign: 'center', padding: '80px', color: COLORS.text.muted }}>
           <IconAlertTriangle size={40} style={{ marginBottom: '12px', opacity: 0.4 }} />
           <div>Ticket introuvable</div>
@@ -91,7 +91,7 @@ export function ClosureScreen() {
 
   return (
     <div style={{ maxWidth: '1380px', margin: '0 auto', padding: '20px 20px 40px' }}>
-      <NavBar title="Centre de Gestion des Réclamations" notifCount={3} />
+      <NavBar title="Centre de Gestion des Réclamations" />
 
       <div style={{ paddingTop: '32px', maxWidth: '640px', margin: '0 auto' }}>
 

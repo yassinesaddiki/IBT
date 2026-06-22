@@ -52,7 +52,7 @@ export function TicketDetailScreen() {
   if (!ticket) {
     return (
       <div style={{ maxWidth: '1380px', margin: '0 auto', padding: '20px' }}>
-        <NavBar title={navTitle} notifCount={3} />
+        <NavBar title={navTitle} />
         <div style={{ textAlign: 'center', padding: '80px', color: COLORS.text.muted }}>
           <IconAlertTriangle size={40} style={{ marginBottom: '12px', opacity: 0.4 }} />
           <div style={{ fontSize: '16px' }}>Ticket introuvable</div>
@@ -70,7 +70,7 @@ export function TicketDetailScreen() {
 
   return (
     <div style={{ maxWidth: '1380px', margin: '0 auto', padding: '20px 20px 40px' }}>
-      <NavBar title={navTitle} notifCount={3} />
+      <NavBar title={navTitle} />
 
       <div style={{ paddingTop: '24px' }}>
 

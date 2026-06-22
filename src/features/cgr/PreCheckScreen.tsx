@@ -13,7 +13,7 @@ export function PreCheckScreen() {
 
   return (
     <div style={{ maxWidth: '1380px', margin: '0 auto', padding: '20px 20px 40px' }}>
-      <NavBar title="Centre de Gestion des Réclamations" notifCount={3} />
+      <NavBar title="Centre de Gestion des Réclamations" />
 
       <div
         style={{

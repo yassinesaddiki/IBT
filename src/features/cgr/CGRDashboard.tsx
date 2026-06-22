@@ -71,7 +71,7 @@ export function CGRDashboard() {
         title="Centre de Gestion des Réclamations"
         ctaLabel="+ Nouveau Appel"
         onCtaClick={() => navigate('/cgr/precheck')}
-        notifCount={3}
+       
       />
 
       <div style={{ paddingTop: '24px' }}>

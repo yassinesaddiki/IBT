@@ -46,7 +46,7 @@ export function CoordinatorTickets() {
 
   return (
     <div style={{ maxWidth: '1380px', margin: '0 auto', padding: '20px 20px 40px' }}>
-      <NavBar title="Coordinateur" notifCount={pendingApproval} />
+      <NavBar title="Coordinateur" />
       <SubNav links={COORDINATOR_NAV(pendingApproval)} />
 
       <div style={{ paddingTop: '24px' }}>

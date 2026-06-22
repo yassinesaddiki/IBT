@@ -63,7 +63,7 @@ export function DutyScheduleScreen() {
 
   return (
     <div style={{ maxWidth: '1380px', margin: '0 auto', padding: '20px 20px 40px' }}>
-      <NavBar title="Coordinateur" notifCount={0} />
+      <NavBar title="Coordinateur" />
       <SubNav links={COORDINATOR_NAV(0)} />
 
       <div style={{ paddingTop: '24px' }}>

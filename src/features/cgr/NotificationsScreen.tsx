@@ -21,7 +21,7 @@ export function NotificationsScreen() {
 
   return (
     <div style={{ maxWidth: '1380px', margin: '0 auto', padding: '20px 20px 40px' }}>
-      <NavBar title="Centre de Gestion des Réclamations" notifCount={unread} />
+      <NavBar title="Centre de Gestion des Réclamations" />
 
       <div style={{ paddingTop: '24px', maxWidth: '720px', margin: '0 auto' }}>
 

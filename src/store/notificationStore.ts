@@ -21,9 +21,12 @@ function rowToNotif(r: Record<string, unknown>): AppNotification {
     time:     r.created_at as string,
     read:     r.read     as boolean,
     ticketId: r.ticket_id as string | undefined,
-    roles:    [],  // not stored per-notification in Supabase, handled by user_id filter
+    roles:    [],
   }
 }
+
+// Keep track of the active channel so we don't subscribe twice
+let activeChannel: ReturnType<typeof supabase.channel> | null = null
 
 export const useNotificationStore = create<NotificationState>()((set) => ({
   notifications: [],
@@ -43,9 +46,32 @@ export const useNotificationStore = create<NotificationState>()((set) => ({
       const notifications = (data ?? []).map((r) => rowToNotif(r as Record<string, unknown>))
       set({ notifications: notifications.length ? notifications : [], loading: false })
     } catch {
-      // Fallback to mock data if Supabase table doesn't have data yet
       set({ notifications: MOCK_NOTIFICATIONS, loading: false })
     }
+
+    // Tear down any previous subscription before creating a new one
+    if (activeChannel) {
+      void supabase.removeChannel(activeChannel)
+      activeChannel = null
+    }
+
+    // Real-time: listen for new rows inserted for this user
+    activeChannel = supabase
+      .channel(`notifications:${userId}`)
+      .on(
+        'postgres_changes',
+        {
+          event:  'INSERT',
+          schema: 'public',
+          table:  'notifications',
+          filter: `user_id=eq.${userId}`,
+        },
+        (payload) => {
+          const newNotif = rowToNotif(payload.new as Record<string, unknown>)
+          set((s) => ({ notifications: [newNotif, ...s.notifications] }))
+        },
+      )
+      .subscribe()
   },
 
   markRead: async (id) => {
@@ -63,7 +89,6 @@ export const useNotificationStore = create<NotificationState>()((set) => ({
   },
 }))
 
-// Call this after login
 export async function initNotifications(userId: string) {
   await useNotificationStore.getState().init(userId)
 }

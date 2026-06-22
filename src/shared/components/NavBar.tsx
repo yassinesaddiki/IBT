@@ -2,27 +2,34 @@ import { useNavigate } from 'react-router-dom'
 import { IconBolt, IconBell, IconLogout } from '@tabler/icons-react'
 import { useAuthStore } from '../../store/authStore'
 import { useEmployeeStore } from '../../store/employeeStore'
+import { useNotificationStore } from '../../store/notificationStore'
 import { COLORS } from '../../design-system/tokens'
 
-interface NavBarProps {
-  ctaLabel?: string
-  onCtaClick?: () => void
-  notifCount?: number
-  title?: string
+const NOTIF_ROUTE: Record<string, string> = {
+  cgr:         '/cgr/notifications',
+  coordinator: '/coordinator/notifications',
+  observer:    '/observer/notifications',
 }
 
-export function NavBar({ ctaLabel, onCtaClick, notifCount = 0, title }: NavBarProps) {
-  const user      = useAuthStore((s) => s.user)
-  const logout    = useAuthStore((s) => s.logout)
-  const navigate  = useNavigate()
-  const employees  = useEmployeeStore((s) => s.employees)
+interface NavBarProps {
+  ctaLabel?:   string
+  onCtaClick?: () => void
+  title?:      string
+}
+
+export function NavBar({ ctaLabel, onCtaClick, title }: NavBarProps) {
+  const user          = useAuthStore((s) => s.user)
+  const logout        = useAuthStore((s) => s.logout)
+  const navigate      = useNavigate()
+  const employees     = useEmployeeStore((s) => s.employees)
+  const notifications = useNotificationStore((s) => s.notifications)
+
   const myEmployee = user?.employeeId ? employees.find((e) => e.id === user.employeeId) : undefined
   const avatarUrl  = myEmployee?.avatarUrl
+  const unread     = notifications.filter((n) => !n.read).length
+  const notifRoute = user?.role ? (NOTIF_ROUTE[user.role] ?? null) : null
 
-  const handleLogout = () => {
-    logout()
-    navigate('/login')
-  }
+  const handleLogout = () => { logout(); navigate('/login') }
 
   return (
     <nav
@@ -73,20 +80,33 @@ export function NavBar({ ctaLabel, onCtaClick, notifCount = 0, title }: NavBarPr
             {ctaLabel}
           </button>
         )}
-        <div style={{ position: 'relative', cursor: 'pointer' }}>
+
+        {/* Bell — real unread count, clickable */}
+        <div
+          onClick={() => notifRoute && navigate(notifRoute)}
+          style={{ position: 'relative', cursor: notifRoute ? 'pointer' : 'default' }}
+        >
           <IconBell size={20} color="rgba(255,255,255,0.7)" />
-          {notifCount > 0 && (
+          {unread > 0 && (
             <span style={{
               position: 'absolute', top: '-4px', right: '-5px',
-              width: '16px', height: '16px', background: '#EF4444',
+              minWidth: '16px', height: '16px', background: '#EF4444',
               borderRadius: '50%', display: 'flex', alignItems: 'center',
               justifyContent: 'center', fontSize: '9px', color: '#fff', fontWeight: 500,
+              padding: '0 3px',
             }}>
-              {notifCount}
+              {unread > 99 ? '99+' : unread}
             </span>
           )}
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+
+        {/* Avatar + name → profile */}
+        <div
+          onClick={() => user?.employeeId && navigate(`/employee/${user.employeeId}`)}
+          style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: user?.employeeId ? 'pointer' : 'default', padding: '4px 6px', borderRadius: '8px' }}
+          onMouseEnter={(e) => { if (user?.employeeId) e.currentTarget.style.background = 'rgba(255,255,255,0.08)' }}
+          onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent' }}
+        >
           <div style={{
             width: '30px', height: '30px', borderRadius: '50%',
             background: 'rgba(255,255,255,0.15)', display: 'flex',
@@ -100,6 +120,9 @@ export function NavBar({ ctaLabel, onCtaClick, notifCount = 0, title }: NavBarPr
           </div>
           <span style={{ color: 'rgba(255,255,255,0.8)', fontSize: '13px' }}>{user?.name}</span>
         </div>
+
+        <div style={{ width: '1px', height: '20px', background: 'rgba(255,255,255,0.15)' }} />
+
         <button
           onClick={handleLogout}
           title="Se déconnecter"
