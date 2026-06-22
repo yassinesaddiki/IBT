@@ -3,6 +3,7 @@ import { IconBolt, IconBell, IconTicket, IconClock, IconCircleCheck, IconChevron
 import { COLORS } from '../../design-system/tokens'
 import { useAuth } from '../../shared/hooks/useAuth'
 import { useTickets } from '../../shared/hooks/useTickets'
+import { useTicketStore } from '../../store/ticketStore'
 import { useDutyStore } from '../../store/dutyStore'
 import { StatusBadge } from '../../design-system/components/Badge'
 import { SeverityBadge } from '../../design-system/components/Badge'
@@ -12,6 +13,8 @@ export function EEPDashboard() {
   const { user, logout } = useAuth()
   const { tickets }      = useTickets()
   const navigate         = useNavigate()
+  const initTickets      = useTicketStore((s) => s.init)
+  const tickLoading      = useTicketStore((s) => s.loading)
   const sectors          = useDutyStore((s) => s.sectors)
 
   // Match by sectorId (reliable) OR sector name (fallback for tickets created before fix)
@@ -58,8 +61,10 @@ export function EEPDashboard() {
               <IconBell size={22} color="rgba(255,255,255,0.8)" />
               <span style={{ position: 'absolute', top: '-4px', right: '-4px', width: '14px', height: '14px', background: '#EF4444', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '8px', color: '#fff', fontWeight: 500 }}>2</span>
             </div>
-            <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: 'rgba(255,255,255,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', fontWeight: 500, color: '#fff', cursor: 'pointer' }}
-              onClick={logout}>
+            <div
+              style={{ width: '32px', height: '32px', borderRadius: '50%', background: 'rgba(255,255,255,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', fontWeight: 500, color: '#fff', cursor: 'pointer' }}
+              onClick={() => user?.employeeId ? navigate(`/employee/${user.employeeId}`) : navigate('/eep/notifications')}
+            >
               {user?.initials ?? '?'}
             </div>
           </div>
@@ -82,7 +87,12 @@ export function EEPDashboard() {
           </div>
 
           {/* Ticket list */}
-          <div style={{ fontSize: '13px', fontWeight: 500, color: COLORS.text.primary, marginBottom: '10px' }}>Mes tickets actifs</div>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px' }}>
+            <div style={{ fontSize: '13px', fontWeight: 500, color: COLORS.text.primary }}>Mes tickets actifs</div>
+            <button onClick={() => void initTickets()} disabled={tickLoading} style={{ fontSize: '11px', color: COLORS.brand.blue, background: 'none', border: 'none', cursor: tickLoading ? 'wait' : 'pointer', fontFamily: 'inherit', padding: '0' }}>
+              {tickLoading ? 'Chargement…' : 'Actualiser'}
+            </button>
+          </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
             {myTickets.length === 0 ? (
               <div style={{ textAlign: 'center', padding: '32px', color: COLORS.text.muted, fontSize: '13px' }}>Aucun ticket actif</div>

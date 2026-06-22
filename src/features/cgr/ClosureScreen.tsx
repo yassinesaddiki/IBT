@@ -7,8 +7,7 @@ import { COLORS } from '../../design-system/tokens'
 import { useTicketStore } from '../../store/ticketStore'
 import { useAuthStore } from '../../store/authStore'
 import { formatDateTime } from '../../shared/utils/formatDate'
-
-type Satisfaction = 'satisfait' | 'probleme-persistant' | 'remarques'
+import type { Satisfaction } from '../../shared/types/ticket'
 
 const SATISFACTION_OPTIONS: {
   value: Satisfaction; label: string; desc: string

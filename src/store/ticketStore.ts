@@ -123,6 +123,34 @@ async function fetchOneTicket(id: string): Promise<Ticket | null> {
   )
 }
 
+// ─── Notification helper ─────────────────────────────────────────────────────
+
+async function notifyUsers(
+  userIds: string[],
+  type: 'info' | 'success' | 'warning' | 'danger',
+  title: string,
+  message: string,
+  ticketId: string,
+) {
+  if (!userIds.length) return
+  const rows = userIds.map((uid) => ({
+    user_id:   uid,
+    type,
+    title,
+    message,
+    ticket_id: ticketId,
+    read:      false,
+  }))
+  await supabase.from('notifications').insert(rows)
+}
+
+async function getAccountsByRole(role: string, sectorId?: string): Promise<string[]> {
+  let q = supabase.from('user_accounts').select('id').eq('role', role).eq('active', true)
+  if (sectorId) q = q.eq('sector_id', sectorId)
+  const { data } = await q
+  return (data ?? []).map((r: Record<string, unknown>) => r.id as string)
+}
+
 // ─── Store ───────────────────────────────────────────────────────────────────
 
 interface TicketState {
@@ -208,6 +236,9 @@ export const useTicketStore = create<TicketState>()((set, get) => ({
     if (error) throw error
     const newId = (row as Record<string, unknown>).id as string
     await get().refreshTicket(newId)
+    // Notify EEP agents of the sector about the new ticket
+    const eepIds = await getAccountsByRole('eep', (data as Ticket & { sectorId?: string }).sectorId)
+    await notifyUsers(eepIds, 'info', 'Nouveau ticket', `Ticket ${newId} créé — ${data.category}`, newId)
     return newId
   },
 
@@ -265,6 +296,8 @@ export const useTicketStore = create<TicketState>()((set, get) => ({
     }).eq('ticket_id', id)
     await supabase.from('tickets').update({ status: 'resolu-eep' }).eq('id', id)
     await get().refreshTicket(id)
+    const cgrIds = await getAccountsByRole('cgr')
+    await notifyUsers(cgrIds, 'success', 'Ticket résolu', `Ticket ${id} résolu par l'équipe de permanance`, id)
   },
 
   referToSED: async (id, data) => {
@@ -281,6 +314,8 @@ export const useTicketStore = create<TicketState>()((set, get) => ({
     })
     await supabase.from('tickets').update({ status: 'attente-approbation' }).eq('id', id)
     await get().refreshTicket(id)
+    const coordIds = await getAccountsByRole('coordinator')
+    await notifyUsers(coordIds, 'warning', 'Approbation requise', `Ticket ${id} référé à SED — en attente d'approbation`, id)
   },
 
   // ── Coordinator ────────────────────────────────────────────────────────────
@@ -300,6 +335,8 @@ export const useTicketStore = create<TicketState>()((set, get) => ({
     })
     await supabase.from('tickets').update({ status: 'approuve-sed' }).eq('id', id)
     await get().refreshTicket(id)
+    const sedIds = await getAccountsByRole('sed')
+    await notifyUsers(sedIds, 'info', 'Nouveau ticket SED', `Ticket ${id} approuvé et assigné à votre équipe`, id)
   },
 
   rejectTicket: async (id, coordinatorId, coordinatorName, comments) => {
@@ -355,6 +392,8 @@ export const useTicketStore = create<TicketState>()((set, get) => ({
     }).eq('ticket_id', id)
     await supabase.from('tickets').update({ status: 'resolu-sed' }).eq('id', id)
     await get().refreshTicket(id)
+    const cgrIds2 = await getAccountsByRole('cgr')
+    await notifyUsers(cgrIds2, 'success', 'Ticket résolu SED', `Ticket ${id} résolu par l'équipe SED`, id)
   },
 
   reset: () => set({ tickets: [], loading: false }),

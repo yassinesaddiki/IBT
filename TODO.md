@@ -68,11 +68,9 @@
 
 ---
 
-## 🔴 TODO — Tâches prioritaires
+## ✅ DONE — Bugs session juin 2026 (Tâches A–G)
 
----
-
-### TÂCHE A — Session perdue au refresh (CRITIQUE — bloque tout)
+### ✅ TÂCHE A — Session perdue au refresh
 
 **Problème :** `authStore.ts` utilise `create<AuthState>()` sans le middleware `persist`. La session utilisateur (`user`) est stockée uniquement en mémoire. Chaque rechargement de page → `user = null` → toutes les routes `ProtectedRoute` redirigent vers `/login`.
 
@@ -89,7 +87,7 @@
 
 ---
 
-### TÂCHE B — Clic profil → déconnexion (UX cassée)
+### ✅ TÂCHE B — Clic profil → déconnexion (UX cassée)
 
 **Problème :** Dans `NavBar.tsx`, le cercle avatar (initiales utilisateur) et le nom n'ont AUCUN `onClick`. Le bouton de déconnexion (`IconLogout`) est collé juste à côté, sans séparation claire. L'utilisateur clique sur l'icône de déconnexion en pensant accéder à son profil.
 
@@ -109,7 +107,7 @@
 
 ---
 
-### TÂCHE C — `user.employeeId` non propagé + login par username cassé
+### ✅ TÂCHE C — `user.employeeId` non propagé + login par username cassé
 
 **Problème 1 :** `authStore.login()` fait `const { password: _pw, ...user } = found` — ce qui spread tout MockUser dans user, INCLUANT `employeeId`. Mais la fonction de recherche actuelle ne matche PAS par `username`. Si l'utilisateur tape `cgr123` (le hint de l'interface), ça cherche `u.id === 'cgr123'` (raté, l'id est `'cgr-1'`) ou `u.name === 'cgr123'` (raté, le nom est `'Amina Kettani'`). La connexion échoue silencieusement si l'utilisateur suit les instructions à l'écran.
 
@@ -149,7 +147,7 @@ void initNotifications(found.id)
 
 ---
 
-### TÂCHE D — Noms employés non cliquables dans les tickets et rapports
+### ✅ TÂCHE D — Noms employés non cliquables dans les tickets et rapports
 
 **Problème :** `EmployeeChip` est correctement implémenté et navigue vers `/employee/:id`, MAIS plusieurs écrans affichent encore les noms d'agents en texte brut sans l'utiliser.
 
@@ -177,7 +175,7 @@ const emp = useEmployeeByName(ticket.eepIntervention?.agentName)
 
 ---
 
-### TÂCHE E — Planning de garde vide (race condition + données de la mauvaise semaine)
+### ✅ TÂCHE E — Planning de garde vide (race condition + données de la mauvaise semaine)
 
 **Problème 1 — Race condition :**
 `useCurrentDuty()` appelle `getWeekStart(new Date())` pour trouver la semaine courante, puis cherche dans `dutyStore.schedule`. Mais au moment du premier rendu, `dutyStore.init()` n'a peut-être pas encore chargé depuis Supabase. Résultat : la sidebar "Équipe de garde" est vide au premier render, même si des données existent.
@@ -201,7 +199,7 @@ ON CONFLICT DO NOTHING;
 
 ---
 
-### TÂCHE F — Notifications jamais initialisées depuis Supabase
+### ✅ TÂCHE F — Notifications jamais initialisées depuis Supabase
 
 **Problème :** `notificationStore.init(userId)` n'est nulle part appelé au démarrage. Les 4 écrans de notifications tombent systématiquement sur les MOCK_NOTIFICATIONS comme fallback, jamais sur les vraies données Supabase.
 
@@ -220,7 +218,7 @@ ON CONFLICT DO NOTHING;
 
 ---
 
-### TÂCHE G — Audit général — fonctionnalités manquantes ou cassées
+### ✅ TÂCHE G — Audit général — fonctionnalités manquantes ou cassées
 
 **G1 — Photos terrain : pas encore implémentées (bloquant pour la démo)**
 
@@ -231,23 +229,13 @@ Les écrans suivants montrent des placeholders photos mais n'uploadent rien :
 
 Ce sont les Tâches 6 et 7 du TODO principal (Supabase Storage). À implémenter en priorité après les bugs A-F.
 
-**G2 — MobileLayout : pas de lien profil pour EP/SED**
-- En-tête mobile montre nom + secteur mais aucun moyen de voir son profil
-- Fix : rendre le bloc utilisateur cliquable → `/employee/${user?.employeeId}`
+**✅ G2 — MobileLayout : pas de lien profil pour EP/SED** — avatar EEPDashboard navigue vers `/employee/:id`
 
-**G3 — Ticket créé → EEP notifiée ? Non**
-- La création d'un ticket n'insère rien dans `notifications` Supabase
-- L'EP ne reçoit aucune alerte push/in-app pour les nouveaux tickets de son secteur
-- Fix intermédiaire : à la création d'un ticket, insérer une notification pour tous les comptes EP du secteur correspondant
+**✅ G3 — Ticket créé → EEP notifiée** — `ticketStore.addTicket()` insère notification pour tous les comptes EP du secteur
 
-**G4 — Ticket résolu → CGR notifiée ? Non**
-- Quand l'EP résout un ticket, aucune notification n'est créée pour le CGR
-- Même problème pour toutes les transitions de statut (référencement, approbation, etc.)
-- Fix : dans chaque mutation du `ticketStore`, appeler une fonction `createNotification(userId, type, title, message, ticketId)` qui insère dans Supabase
+**✅ G4 — Ticket résolu → CGR notifiée** — `resolveEEP`, `resolveSED`, `referToSED`, `approveTicket` insèrent des notifications via `notifyUsers()` helper
 
-**G5 — AuthStore match username manquant (voir Tâche C)**
-- Actuellement le login par `cgr123` ne fonctionne peut-être pas
-- Test rapide : login avec identifiant `Amina Kettani` et mot de passe `cgr123` — si ça marche, le bug est confirmé côté username
+**✅ G5 — AuthStore match username** — corrigé dans Tâche C
 
 **G6 — `useDutyAgents.getWeekStart()` vs `DutyScheduleScreen.getWeeks()` — deux calculs différents**
 - `getWeekStart()` dans `useDutyAgents.ts` calcule le lundi de la semaine courante
@@ -266,24 +254,13 @@ Ce sont les Tâches 6 et 7 du TODO principal (Supabase Storage). À implémenter
 - `TicketDetailScreen`, `SEDTicketDetail`, `ApprovalScreen` : ajouter `Véhicule : DO 248 · Dacia Sandero` sous le nom de l'agent
 - Utiliser `useEmployee(agentId)?.vehicle` pour afficher la plaque + marque/modèle
 
-**G9 — `SEDStatusUpdate.tsx` : `updateStatus` supprimé mais le else-case ne fait rien**
-- Après la migration vers Supabase, on a supprimé `updateStatus`
-- Dans `SEDStatusUpdate.handleConfirm()`, les cas `resolu-sed`, `suspendu`, `programme` naviguent vers les bons écrans → OK
-- Mais le cas `else` ne fait rien (pour `lu-eep` / `en-cours-eep` qui n'existent pas pour SED)
-- Vérifier que tous les cas SED sont bien couverts
+**✅ G9 — `SEDStatusUpdate.tsx`** — vérifié : tous les cas SED (`en-cours-sed`, `resolu-sed`, `suspendu`, `programme`) naviguent vers les bons écrans. Pas de cas orphelins.
 
-**G10 — `ClosureScreen.tsx` : type `Satisfaction` non exporté**
-- `const payload: Omit<TicketClosure, 'closedAt'>` inclut `satisfaction: satisfaction as Satisfaction`
-- Mais `Satisfaction` est défini localement dans ClosureScreen — l'exporter depuis `ticket.ts`
+**✅ G10 — `ClosureScreen.tsx` : type `Satisfaction`** — exporté depuis `src/shared/types/ticket.ts`, import mis à jour dans ClosureScreen.
 
-**G11 — Réactivité : tickets non rechargés automatiquement**
-- Les dashboards montrent les tickets chargés au démarrage
-- Si un autre utilisateur crée ou modifie un ticket, l'app ne le sait pas (pas de Supabase Realtime)
-- Fix intermédiaire : ajouter un bouton "Actualiser" sur les dashboards
-- Fix complet : Supabase Realtime subscriptions (Tâche 5 du TODO original)
+**✅ G11 — Bouton Actualiser** — ajouté sur CGRDashboard, CoordinatorDashboard, EEPDashboard. Appelle `ticketStore.init()` à la demande.
 
-**G12 — Observer : `ObserverTickets.tsx` utilise encore le ticketStore (mock ou Supabase ?)**
-- Vérifier que `ObserverTickets` lit bien depuis le store Supabase-backed et non depuis un import mock direct
+**✅ G12 — `ObserverTickets.tsx`** — confirmé : utilise `useTickets()` → store Supabase-backed. Pas de mock direct.
 
 ---
 

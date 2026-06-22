@@ -8,14 +8,19 @@ import { SeverityBadge } from '../../design-system/components/Badge'
 import { Card } from '../../design-system/components/Card'
 import { COLORS } from '../../design-system/tokens'
 import { useTickets } from '../../shared/hooks/useTickets'
+import { useTicketStore } from '../../store/ticketStore'
 import { EmployeeChip } from '../../shared/components/EmployeeChip'
 import { useCurrentDuty } from '../../shared/hooks/useDutyAgents'
+import { useDutyStore } from '../../store/dutyStore'
 import { formatElapsed } from '../../shared/utils/formatDate'
 
 export function CoordinatorDashboard() {
   const { tickets }  = useTickets()
   const navigate     = useNavigate()
-  const currentDuty = useCurrentDuty()
+  const initTickets  = useTicketStore((s) => s.init)
+  const tickLoading  = useTicketStore((s) => s.loading)
+  const currentDuty  = useCurrentDuty()
+  const dutyLoading  = useDutyStore((s) => s.loading)
   const totalDutyAgents = currentDuty.reduce((n, sd) => n + sd.agents.length, 0)
 
   const kpi = {
@@ -38,9 +43,14 @@ export function CoordinatorDashboard() {
             <div style={{ fontSize: '18px', fontWeight: 500, color: COLORS.text.primary }}>Tableau de bord Coordinateur</div>
             <div style={{ fontSize: '13px', color: COLORS.text.secondary, marginTop: '2px' }}>Vue globale · Gestion et approbations</div>
           </div>
-          <button onClick={() => navigate('/coordinator/planning')} style={{ height: '36px', background: COLORS.bg.surface, color: COLORS.brand.blue, border: `0.5px solid ${COLORS.brand.blue}`, borderRadius: '8px', fontSize: '13px', fontWeight: 500, cursor: 'pointer', padding: '0 14px', display: 'inline-flex', alignItems: 'center', gap: '6px', fontFamily: 'inherit' }}>
-            <IconCalendarEvent size={15} /> Planning de garde
-          </button>
+          <div style={{ display: 'flex', gap: '8px' }}>
+            <button onClick={() => void initTickets()} disabled={tickLoading} style={{ height: '36px', background: COLORS.bg.surface, color: COLORS.text.secondary, border: `0.5px solid ${COLORS.border.strong}`, borderRadius: '8px', fontSize: '13px', fontWeight: 500, cursor: tickLoading ? 'wait' : 'pointer', padding: '0 14px', display: 'inline-flex', alignItems: 'center', gap: '6px', fontFamily: 'inherit' }}>
+              {tickLoading ? 'Chargement…' : 'Actualiser'}
+            </button>
+            <button onClick={() => navigate('/coordinator/planning')} style={{ height: '36px', background: COLORS.bg.surface, color: COLORS.brand.blue, border: `0.5px solid ${COLORS.brand.blue}`, borderRadius: '8px', fontSize: '13px', fontWeight: 500, cursor: 'pointer', padding: '0 14px', display: 'inline-flex', alignItems: 'center', gap: '6px', fontFamily: 'inherit' }}>
+              <IconCalendarEvent size={15} /> Planning de garde
+            </button>
+          </div>
         </div>
 
         {/* KPIs */}
@@ -118,7 +128,8 @@ export function CoordinatorDashboard() {
           <aside style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
             <Card>
               <div style={{ fontSize: '14px', fontWeight: 500, color: COLORS.text.primary, marginBottom: '14px' }}>Équipe de garde</div>
-              {currentDuty.map((sd) => (
+              {dutyLoading && <div style={{ fontSize: '12px', color: COLORS.text.secondary, padding: '8px 0' }}>Chargement…</div>}
+              {!dutyLoading && currentDuty.map((sd) => (
                 <div key={sd.sectorId} style={{ marginBottom: '14px' }}>
                   <div style={{ fontSize: '11px', fontWeight: 500, color: COLORS.text.secondary, textTransform: 'uppercase', letterSpacing: '.05em', marginBottom: '8px' }}>{sd.sectorName}</div>
                   {sd.agents.length === 0 && <div style={{ fontSize: '11px', color: COLORS.text.muted, fontStyle: 'italic' }}>Aucun agent assigné</div>}

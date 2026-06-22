@@ -6,9 +6,11 @@ import { StatusBadge } from '../../design-system/components/Badge'
 import { SeverityBadge } from '../../design-system/components/Badge'
 import { COLORS } from '../../design-system/tokens'
 import { useTickets } from '../../shared/hooks/useTickets'
+import { useTicketStore } from '../../store/ticketStore'
 import { formatElapsed } from '../../shared/utils/formatDate'
 import { EmployeeChip } from '../../shared/components/EmployeeChip'
 import { useCurrentDuty } from '../../shared/hooks/useDutyAgents'
+import { useDutyStore } from '../../store/dutyStore'
 import type { TicketStatus } from '../../shared/types/status'
 
 type FilterStatus = TicketStatus | 'tous'
@@ -26,7 +28,10 @@ const FILTER_TABS: { key: FilterStatus; label: string }[] = [
 export function CGRDashboard() {
   const { tickets }  = useTickets()
   const navigate     = useNavigate()
-  const currentDuty  = useCurrentDuty()  // sectors with real employees from DB schedule
+  const initTickets  = useTicketStore((s) => s.init)
+  const loading      = useTicketStore((s) => s.loading)
+  const currentDuty  = useCurrentDuty()
+  const dutyLoading  = useDutyStore((s) => s.loading)
   const [filter, setFilter]   = useState<FilterStatus>('tous')
   const [search, setSearch]   = useState('')
 
@@ -141,6 +146,19 @@ export function CGRDashboard() {
                   <FilterBtn icon={<IconMapPin size={14} />} label="Secteur" />
                   <FilterBtn icon={<IconAdjustmentsHorizontal size={14} />} label="Filtres" />
                   <FilterBtn icon={<IconDownload size={14} />} label="Export" />
+                  <button
+                    onClick={() => void initTickets()}
+                    disabled={loading}
+                    title="Actualiser les tickets"
+                    style={{
+                      height: '34px', padding: '0 12px', border: `0.5px solid ${COLORS.border.strong}`,
+                      borderRadius: '8px', fontSize: '12px', fontWeight: 500, cursor: loading ? 'wait' : 'pointer',
+                      background: COLORS.bg.surface, color: COLORS.text.secondary, fontFamily: 'inherit',
+                      display: 'flex', alignItems: 'center', gap: '4px',
+                    }}
+                  >
+                    {loading ? 'Chargement…' : 'Actualiser'}
+                  </button>
                 </div>
               </div>
 
@@ -248,7 +266,10 @@ export function CGRDashboard() {
                 </div>
                 <span style={{ fontSize: '11px', color: COLORS.text.secondary }}>Sem. 25</span>
               </div>
-              {currentDuty.map((sd) => (
+              {dutyLoading && (
+                <div style={{ fontSize: '12px', color: COLORS.text.secondary, padding: '8px 0' }}>Chargement…</div>
+              )}
+              {!dutyLoading && currentDuty.map((sd) => (
                 <div key={sd.sectorId} style={{ marginBottom: '14px' }}>
                   <div style={{ fontSize: '11px', fontWeight: 500, color: COLORS.text.secondary, textTransform: 'uppercase', letterSpacing: '.05em', marginBottom: '8px' }}>{sd.sectorName}</div>
                   {sd.agents.length === 0 && (
@@ -269,7 +290,7 @@ export function CGRDashboard() {
                 </div>
               ))}
               <div style={{ paddingTop: '12px', borderTop: `0.5px solid #F1F3F5` }}>
-                <a href="#" style={{ fontSize: '12px', color: COLORS.brand.blue, fontWeight: 500, textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                <a href="/coordinator/planning" style={{ fontSize: '12px', color: COLORS.brand.blue, fontWeight: 500, textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '4px' }}>
                   <IconCalendarEvent size={13} /> Voir le planning complet
                 </a>
               </div>

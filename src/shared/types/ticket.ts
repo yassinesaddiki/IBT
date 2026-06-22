@@ -37,9 +37,11 @@ export interface SEDIntervention {
   comments?: string
 }
 
+export type Satisfaction = 'satisfait' | 'probleme-persistant' | 'remarques'
+
 export interface TicketClosure {
   clientCalled: boolean
-  satisfaction?: 'satisfait' | 'probleme-persistant' | 'remarques'
+  satisfaction?: Satisfaction
   comments?: string
   closedBy: string
   closedAt: Date

@@ -91,13 +91,13 @@ INSERT INTO user_accounts (id, name, role, username, password, sector_id, employ
 ON CONFLICT (id) DO NOTHING;
 
 
--- ── DUTY SCHEDULE (semaine courante) ─────────────────────────
--- Semaine du 16 juin 2026 (lundi)
+-- ── DUTY SCHEDULE (semaine courante — calculée dynamiquement) ──────────────
+-- date_trunc('week', CURRENT_DATE) retourne toujours le lundi de la semaine en cours
 INSERT INTO duty_schedule (week_start, sector_id, slot_index, employee_id) VALUES
-  ('2026-06-16', 's-1', 0, 'emp-1'),
-  ('2026-06-16', 's-1', 1, 'emp-2'),
-  ('2026-06-16', 's-2', 0, 'emp-3'),
-  ('2026-06-16', 's-2', 1, 'emp-4'),
-  ('2026-06-16', 's-3', 0, 'emp-5'),
-  ('2026-06-16', 's-3', 1, 'emp-6')
+  (date_trunc('week', CURRENT_DATE)::date, 's-1', 0, 'emp-1'),
+  (date_trunc('week', CURRENT_DATE)::date, 's-1', 1, 'emp-2'),
+  (date_trunc('week', CURRENT_DATE)::date, 's-2', 0, 'emp-3'),
+  (date_trunc('week', CURRENT_DATE)::date, 's-2', 1, 'emp-4'),
+  (date_trunc('week', CURRENT_DATE)::date, 's-3', 0, 'emp-5'),
+  (date_trunc('week', CURRENT_DATE)::date, 's-3', 1, 'emp-6')
 ON CONFLICT (week_start, sector_id, slot_index) DO NOTHING;

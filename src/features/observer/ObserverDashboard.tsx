@@ -10,12 +10,14 @@ import { COLORS } from '../../design-system/tokens'
 import { useTickets } from '../../shared/hooks/useTickets'
 import { EmployeeChip } from '../../shared/components/EmployeeChip'
 import { useCurrentDuty } from '../../shared/hooks/useDutyAgents'
+import { useDutyStore } from '../../store/dutyStore'
 import { formatElapsed } from '../../shared/utils/formatDate'
 
 export function ObserverDashboard() {
   const { tickets }  = useTickets()
   const navigate     = useNavigate()
   const currentDuty     = useCurrentDuty()
+  const dutyLoading     = useDutyStore((s) => s.loading)
   const totalDutyAgents = currentDuty.reduce((n, sd) => n + sd.agents.length, 0)
 
   const kpi = {
@@ -91,7 +93,8 @@ export function ObserverDashboard() {
           <aside style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
             <Card>
               <div style={{ fontSize: '14px', fontWeight: 500, color: COLORS.text.primary, marginBottom: '14px' }}>Planning de garde — Semaine 25</div>
-              {currentDuty.map((sd) => (
+              {dutyLoading && <div style={{ fontSize: '12px', color: COLORS.text.secondary, padding: '8px 0' }}>Chargement…</div>}
+              {!dutyLoading && currentDuty.map((sd) => (
                 <div key={sd.sectorId} style={{ marginBottom: '14px' }}>
                   <div style={{ fontSize: '11px', fontWeight: 500, color: COLORS.text.secondary, textTransform: 'uppercase', letterSpacing: '.05em', marginBottom: '8px' }}>{sd.sectorName}</div>
                   {sd.agents.length === 0 && <div style={{ fontSize: '11px', color: COLORS.text.muted, fontStyle: 'italic' }}>Aucun agent assigné</div>}
