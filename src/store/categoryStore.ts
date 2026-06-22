@@ -22,7 +22,7 @@ interface CategoryState {
 
 export const useCategoryStore = create<CategoryState>()(
   persist(
-    (set, get) => ({
+    (set) => ({
       categories: CATEGORIES,
       loading:    false,
 
@@ -120,7 +120,3 @@ export const useCategoryStore = create<CategoryState>()(
   )
 )
 
-// Convenience: get categoryStore state without subscription (for non-reactive reads)
-export function getCategoryStore() {
-  return useCategoryStore.getState()
-}

@@ -32,6 +32,8 @@ import { SectorManagement }       from './features/coordinator/SectorManagement'
 import { CategoryManagement }     from './features/coordinator/CategoryManagement'
 import { ReportsScreen }          from './features/coordinator/ReportsScreen'
 import { CoordinatorNotifications } from './features/coordinator/CoordinatorNotifications'
+import { VehicleManagement }       from './features/coordinator/VehicleManagement'
+import { AccountManagement }       from './features/coordinator/AccountManagement'
 // Observer
 import { ObserverDashboard }      from './features/observer/ObserverDashboard'
 import { ObserverDutySchedule }   from './features/observer/ObserverDutySchedule'
@@ -88,6 +90,8 @@ export function App() {
       <Route path="/coordinator/employes"                   element={<ProtectedRoute role="coordinator"><EmployeeManagement /></ProtectedRoute>} />
       <Route path="/coordinator/secteurs"                   element={<ProtectedRoute role="coordinator"><SectorManagement /></ProtectedRoute>} />
       <Route path="/coordinator/categories"                 element={<ProtectedRoute role="coordinator"><CategoryManagement /></ProtectedRoute>} />
+      <Route path="/coordinator/vehicules"                  element={<ProtectedRoute role="coordinator"><VehicleManagement /></ProtectedRoute>} />
+      <Route path="/coordinator/comptes"                    element={<ProtectedRoute role="coordinator"><AccountManagement /></ProtectedRoute>} />
       <Route path="/coordinator/notifications"              element={<ProtectedRoute role="coordinator"><CoordinatorNotifications /></ProtectedRoute>} />
 
       {/* ── Observer ── */}

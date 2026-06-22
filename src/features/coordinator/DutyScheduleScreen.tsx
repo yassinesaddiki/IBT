@@ -38,13 +38,14 @@ export function DutyScheduleScreen() {
 
   const week = weeks[weekIdx]
 
+  // Compute the ISO week-start (Monday) string for the selected week
+  const weekStart = week.start.toISOString().slice(0, 10)
 
+  const getSlotAgent = (sectorId: string, slotIdx: number): string =>
+    storeGetSlot(weekStart, sectorId, slotIdx)
 
-  const getSlotAgent = (sectorIdx: number, slotIdx: number): string =>
-    storeGetSlot(weekIdx, sectorIdx, slotIdx)
-
-  const setSlotAgent = (sectorIdx: number, slotIdx: number, agentId: string) => {
-    storeSetSlot(weekIdx, sectorIdx, slotIdx, agentId)
+  const setSlotAgent = (sectorId: string, slotIdx: number, agentId: string) => {
+    void storeSetSlot(weekStart, sectorId, slotIdx, agentId)
     setSaved(false)
   }
 
@@ -53,8 +54,8 @@ export function DutyScheduleScreen() {
     setTimeout(() => { setSaving(false); setSaved(true) }, 800)
   }
 
-  const hasEmpty = sectors.map((s) => s.name).some((_, si) =>
-    [0, 1].some((slot) => !getSlotAgent(si, slot))
+  const hasEmpty = sectors.some((s) =>
+    [0, 1].some((slot) => !getSlotAgent(s.id, slot))
   )
 
   return (
@@ -69,7 +70,7 @@ export function DutyScheduleScreen() {
           <div>
             <div style={{ fontSize: '20px', fontWeight: 500, color: COLORS.text.primary }}>Planning de Garde</div>
             <div style={{ fontSize: '13px', color: COLORS.text.secondary, marginTop: '4px' }}>
-              Assignez les agents EEP par secteur pour chaque semaine
+              Assignez les agents de l'Équipe de Permanance par secteur pour chaque semaine
             </div>
           </div>
           <button
@@ -137,78 +138,75 @@ export function DutyScheduleScreen() {
 
         {/* Schedule grid */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '16px' }} className="schedule-grid">
-          {sectors.map((s) => s.name).map((sector, si) => {
-            const allAgents = agents
-            return (
-              <div
-                key={sector}
-                className="animate-up"
-                style={{ background: COLORS.bg.surface, borderRadius: '14px', border: `0.5px solid ${COLORS.border.default}`, padding: '20px' }}
-              >
-                {/* Sector header */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px' }}>
-                  <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: COLORS.brand.green, flexShrink: 0 }} />
-                  <div style={{ fontSize: '14px', fontWeight: 500, color: COLORS.text.primary }}>{sector}</div>
-                  <span style={{ marginLeft: 'auto', fontSize: '11px', color: COLORS.text.muted }}>2 agents / semaine</span>
-                </div>
-
-                {/* Agent slots */}
-                {[0, 1].map((slotIdx) => {
-                  const currentId    = getSlotAgent(si, slotIdx)
-                  const currentAgent = agents.find((a) => a.id === currentId)
-                  const isEmpty      = !currentId
-
-                  return (
-                    <div key={slotIdx} style={{ marginBottom: slotIdx === 0 ? '12px' : 0 }}>
-                      <div style={{ fontSize: '11px', color: COLORS.text.muted, marginBottom: '6px' }}>
-                        Agent {slotIdx + 1}
-                      </div>
-                      <div style={{
-                        background: isEmpty ? COLORS.severity.critique.bg : COLORS.bg.page,
-                        border: `0.5px solid ${isEmpty ? COLORS.severity.critique.border : COLORS.border.default}`,
-                        borderRadius: '10px', padding: '10px 12px',
-                      }}>
-                        {/* Current agent preview */}
-                        {currentAgent && (
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
-                            <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: COLORS.semantic.info.bg, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px', fontWeight: 500, color: COLORS.semantic.info.text, flexShrink: 0 }}>
-                              {currentAgent.initials}
-                            </div>
-                            <div>
-                              <div style={{ fontSize: '13px', fontWeight: 500, color: COLORS.text.primary }}>{currentAgent.name}</div>
-                              <div style={{ fontSize: '11px', color: COLORS.text.secondary }}>{currentAgent.phone}</div>
-                            </div>
-                            <span style={{ marginLeft: 'auto', width: '7px', height: '7px', borderRadius: '50%', background: currentAgent.online ? COLORS.brand.green : COLORS.text.muted, flexShrink: 0 }} />
-                          </div>
-                        )}
-
-                        {/* Dropdown to change */}
-                        <select
-                          value={currentId}
-                          onChange={(e) => setSlotAgent(si, slotIdx, e.target.value)}
-                          style={{
-                            width: '100%', height: '34px',
-                            border: `0.5px solid ${COLORS.border.strong}`,
-                            borderRadius: '8px', padding: '0 10px',
-                            fontSize: '12px', color: COLORS.text.primary,
-                            background: COLORS.bg.surface, outline: 'none',
-                            cursor: 'pointer', fontFamily: 'inherit',
-                          }}
-                        >
-                          <option value="">— Sélectionner un agent —</option>
-                          <optgroup label="Agents disponibles">
-                            {allAgents.map((a) => (
-                              <option key={a.id} value={a.id}>{a.name} ({a.sector})</option>
-                            ))}
-                          </optgroup>
-                        </select>
-                      </div>
-                    </div>
-                  )
-                })}
+          {sectors.map((sector) => (
+            <div
+              key={sector.id}
+              className="animate-up"
+              style={{ background: COLORS.bg.surface, borderRadius: '14px', border: `0.5px solid ${COLORS.border.default}`, padding: '20px' }}
+            >
+              {/* Sector header */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px' }}>
+                <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: COLORS.brand.green, flexShrink: 0 }} />
+                <div style={{ fontSize: '14px', fontWeight: 500, color: COLORS.text.primary }}>{sector.name}</div>
+                <span style={{ marginLeft: 'auto', fontSize: '11px', color: COLORS.text.muted }}>2 agents / semaine</span>
               </div>
-            )
-          })}
+
+              {/* Agent slots */}
+              {[0, 1].map((slotIdx) => {
+                const currentId    = getSlotAgent(sector.id, slotIdx)
+                const currentAgent = agents.find((a) => a.id === currentId)
+                const isEmpty      = !currentId
+
+                return (
+                  <div key={slotIdx} style={{ marginBottom: slotIdx === 0 ? '12px' : 0 }}>
+                    <div style={{ fontSize: '11px', color: COLORS.text.muted, marginBottom: '6px' }}>
+                      Agent {slotIdx + 1}
+                    </div>
+                    <div style={{
+                      background: isEmpty ? COLORS.severity.critique.bg : COLORS.bg.page,
+                      border: `0.5px solid ${isEmpty ? COLORS.severity.critique.border : COLORS.border.default}`,
+                      borderRadius: '10px', padding: '10px 12px',
+                    }}>
+                      {/* Current agent preview */}
+                      {currentAgent && (
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+                          <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: COLORS.semantic.info.bg, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px', fontWeight: 500, color: COLORS.semantic.info.text, flexShrink: 0 }}>
+                            {currentAgent.initials}
+                          </div>
+                          <div>
+                            <div style={{ fontSize: '13px', fontWeight: 500, color: COLORS.text.primary }}>{currentAgent.name}</div>
+                            <div style={{ fontSize: '11px', color: COLORS.text.secondary }}>{currentAgent.phone}</div>
+                          </div>
+                          <span style={{ marginLeft: 'auto', width: '7px', height: '7px', borderRadius: '50%', background: currentAgent.online ? COLORS.brand.green : COLORS.text.muted, flexShrink: 0 }} />
+                        </div>
+                      )}
+
+                      {/* Dropdown to change */}
+                      <select
+                        value={currentId}
+                        onChange={(e) => setSlotAgent(sector.id, slotIdx, e.target.value)}
+                        style={{
+                          width: '100%', height: '34px',
+                          border: `0.5px solid ${COLORS.border.strong}`,
+                          borderRadius: '8px', padding: '0 10px',
+                          fontSize: '12px', color: COLORS.text.primary,
+                          background: COLORS.bg.surface, outline: 'none',
+                          cursor: 'pointer', fontFamily: 'inherit',
+                        }}
+                      >
+                        <option value="">— Sélectionner un agent —</option>
+                        <optgroup label="Agents disponibles">
+                          {agents.map((a) => (
+                            <option key={a.id} value={a.id}>{a.name} ({a.sector})</option>
+                          ))}
+                        </optgroup>
+                      </select>
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          ))}
         </div>
 
         {/* Summary */}
@@ -218,12 +216,12 @@ export function DutyScheduleScreen() {
             <span style={{ fontSize: '14px', fontWeight: 500, color: COLORS.text.primary }}>Résumé — {week.label} ({week.range})</span>
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '12px' }} className="schedule-grid">
-            {sectors.map((s) => s.name).map((sector, si) => {
-              const a0 = agents.find((a) => a.id === getSlotAgent(si, 0))
-              const a1 = agents.find((a) => a.id === getSlotAgent(si, 1))
+            {sectors.map((sector) => {
+              const a0 = agents.find((a) => a.id === getSlotAgent(sector.id, 0))
+              const a1 = agents.find((a) => a.id === getSlotAgent(sector.id, 1))
               return (
-                <div key={sector} style={{ background: COLORS.bg.page, borderRadius: '10px', padding: '12px' }}>
-                  <div style={{ fontSize: '11px', fontWeight: 500, color: COLORS.text.secondary, textTransform: 'uppercase', letterSpacing: '.05em', marginBottom: '8px' }}>{sector}</div>
+                <div key={sector.id} style={{ background: COLORS.bg.page, borderRadius: '10px', padding: '12px' }}>
+                  <div style={{ fontSize: '11px', fontWeight: 500, color: COLORS.text.secondary, textTransform: 'uppercase', letterSpacing: '.05em', marginBottom: '8px' }}>{sector.name}</div>
                   {[a0, a1].map((a, i) => a ? (
                     <div key={i} style={{ fontSize: '12px', color: COLORS.text.primary, marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '6px' }}>
                       <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: COLORS.brand.green, flexShrink: 0 }} />

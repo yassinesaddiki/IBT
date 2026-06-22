@@ -9,5 +9,9 @@ export interface User {
 }
 
 export interface MockUser extends User {
-  password: string
+  password:    string
+  username:    string
+  active:      boolean
+  sectorId?:   string
+  employeeId?: string
 }

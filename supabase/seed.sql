@@ -6,9 +6,8 @@
 -- ── SECTORS ──────────────────────────────────────────────────
 INSERT INTO sectors (id, name, status) VALUES
   ('s-1', 'Oud Nachif',    'actif'),
-  ('s-2', 'Secteur Est',   'actif'),
-  ('s-3', 'Secteur Ouest', 'actif'),
-  ('s-4', 'Secteur Sud',   'actif')
+  ('s-2', 'Sidi Ziane',   'actif'),
+  ('s-3', 'Sidi Driss El Quadi', 'actif')
 ON CONFLICT (id) DO NOTHING;
 
 
@@ -65,9 +64,6 @@ INSERT INTO employees (id, name, initials, role, sector_id, phone, email, matric
   -- Équipe de Permanance — Secteur Ouest
   ('emp-5',  'Samir Benhima',      'SB', 'eep', 's-3', '0663-678-901', 's.benhima@onee.ma',   '10005E', NULL,  'actif',   '2018-11-05'),
   ('emp-6',  'Rachid Tazi',        'RT', 'eep', 's-3', '0663-789-012', 'r.tazi@onee.ma',      '10006F', NULL,  'actif',   '2020-07-14'),
-  -- Équipe de Permanance — Secteur Sud
-  ('emp-7',  'Nabil Mansouri',     'NM', 'eep', 's-4', '0664-890-123', 'n.mansouri@onee.ma',  '10007G', NULL,  'actif',   '2019-08-22'),
-  ('emp-8',  'Farid El Fassi',     'FE', 'eep', 's-4', '0664-901-234', 'f.elfassi@onee.ma',   '10008H', NULL,  'inactif', '2021-02-28'),
   -- Équipe de Permanance — réserve
   ('emp-9',  'Omar Cherkaoui',     'OC', 'eep', NULL,  '0665-012-345', 'o.cherkaoui@onee.ma', '10009I', NULL,  'actif',   '2023-04-01'),
   -- SED
@@ -87,7 +83,7 @@ INSERT INTO user_accounts (id, name, role, username, password, sector_id, employ
   ('eep-1',   'Mohammed Alami',   'eep',         'eep123',   'eep123',   's-1', NULL,     TRUE),
   ('sed-1',   'Hassan Chraibi',   'sed',         'sed123',   'sed123',   NULL,  'emp-10', TRUE),
   ('coord-1', 'Yasmine Benali',   'coordinator', 'coord123', 'coord123', NULL,  NULL,     TRUE),
-  ('obs-1',   'Directeur Tazi',   'observer',    'obs123',   'obs123',   NULL,  NULL,     TRUE)
+  ('obs-1',   'directeur el ahmadi',   'observer',    'obs123',   'obs123',   NULL,  NULL,     TRUE)
 ON CONFLICT (id) DO NOTHING;
 
 
@@ -99,7 +95,5 @@ INSERT INTO duty_schedule (week_start, sector_id, slot_index, employee_id) VALUE
   ('2026-06-16', 's-2', 0, 'emp-3'),
   ('2026-06-16', 's-2', 1, 'emp-4'),
   ('2026-06-16', 's-3', 0, 'emp-5'),
-  ('2026-06-16', 's-3', 1, 'emp-6'),
-  ('2026-06-16', 's-4', 0, 'emp-7'),
-  ('2026-06-16', 's-4', 1, 'emp-8')
+  ('2026-06-16', 's-3', 1, 'emp-6')
 ON CONFLICT (week_start, sector_id, slot_index) DO NOTHING;
