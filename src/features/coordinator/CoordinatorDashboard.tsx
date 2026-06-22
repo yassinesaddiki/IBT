@@ -135,8 +135,10 @@ export function CoordinatorDashboard() {
                   {sd.agents.length === 0 && <div style={{ fontSize: '11px', color: COLORS.text.muted, fontStyle: 'italic' }}>Aucun agent assigné</div>}
                   {sd.agents.map(({ employee: emp }) => (
                     <div key={emp.id} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '7px 8px', background: COLORS.bg.panel, borderRadius: '8px', marginBottom: '5px' }}>
-                      <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: COLORS.semantic.info.bg, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px', fontWeight: 500, color: COLORS.semantic.info.text, flexShrink: 0 }}>
-                        {emp.initials}
+                      <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: COLORS.semantic.info.bg, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px', fontWeight: 500, color: COLORS.semantic.info.text, flexShrink: 0, overflow: 'hidden' }}>
+                        {emp.avatarUrl
+                          ? <img src={emp.avatarUrl} alt={emp.initials} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                          : emp.initials}
                       </div>
                       <div style={{ flex: 1, minWidth: 0 }}>
                         <EmployeeChip empId={emp.id} name={emp.name} matricule={emp.matricule} variant="block" />

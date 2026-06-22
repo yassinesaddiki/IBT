@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom'
 import { IconBolt, IconBell, IconLogout } from '@tabler/icons-react'
 import { useAuthStore } from '../../store/authStore'
+import { useEmployeeStore } from '../../store/employeeStore'
 import { COLORS } from '../../design-system/tokens'
 
 interface NavBarProps {
@@ -11,9 +12,12 @@ interface NavBarProps {
 }
 
 export function NavBar({ ctaLabel, onCtaClick, notifCount = 0, title }: NavBarProps) {
-  const user     = useAuthStore((s) => s.user)
-  const logout   = useAuthStore((s) => s.logout)
-  const navigate = useNavigate()
+  const user      = useAuthStore((s) => s.user)
+  const logout    = useAuthStore((s) => s.logout)
+  const navigate  = useNavigate()
+  const employees  = useEmployeeStore((s) => s.employees)
+  const myEmployee = user?.employeeId ? employees.find((e) => e.id === user.employeeId) : undefined
+  const avatarUrl  = myEmployee?.avatarUrl
 
   const handleLogout = () => {
     logout()
@@ -82,23 +86,20 @@ export function NavBar({ ctaLabel, onCtaClick, notifCount = 0, title }: NavBarPr
             </span>
           )}
         </div>
-        <div
-          onClick={() => navigate(user?.employeeId ? `/employee/${user.employeeId}` : '#')}
-          style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', padding: '4px 8px', borderRadius: '8px' }}
-          onMouseEnter={(e) => (e.currentTarget.style.background = 'rgba(255,255,255,0.08)')}
-          onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
-        >
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
           <div style={{
             width: '30px', height: '30px', borderRadius: '50%',
             background: 'rgba(255,255,255,0.15)', display: 'flex',
             alignItems: 'center', justifyContent: 'center',
             fontSize: '12px', fontWeight: 500, color: '#fff', flexShrink: 0,
+            overflow: 'hidden',
           }}>
-            {user?.initials ?? '?'}
+            {avatarUrl
+              ? <img src={avatarUrl} alt={user?.initials ?? '?'} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              : (user?.initials ?? '?')}
           </div>
           <span style={{ color: 'rgba(255,255,255,0.8)', fontSize: '13px' }}>{user?.name}</span>
         </div>
-        <div style={{ width: '1px', height: '20px', background: 'rgba(255,255,255,0.15)' }} />
         <button
           onClick={handleLogout}
           title="Se déconnecter"

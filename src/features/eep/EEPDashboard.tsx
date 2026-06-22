@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom'
-import { IconBolt, IconBell, IconTicket, IconClock, IconCircleCheck, IconChevronRight } from '@tabler/icons-react'
+import { IconBolt, IconBell, IconTicket, IconClock, IconCircleCheck, IconChevronRight, IconLogout } from '@tabler/icons-react'
 import { COLORS } from '../../design-system/tokens'
 import { useAuth } from '../../shared/hooks/useAuth'
 import { useTickets } from '../../shared/hooks/useTickets'
@@ -11,6 +11,7 @@ import { formatElapsed } from '../../shared/utils/formatDate'
 
 export function EEPDashboard() {
   const { user, logout } = useAuth()
+  const handleLogout = () => { logout(); navigate('/login') }
   const { tickets }      = useTickets()
   const navigate         = useNavigate()
   const initTickets      = useTicketStore((s) => s.init)
@@ -56,17 +57,22 @@ export function EEPDashboard() {
               <div style={{ color: 'rgba(255,255,255,0.6)', fontSize: '11px' }}>{user?.sector ?? 'Équipe terrain'}</div>
             </div>
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <div style={{ position: 'relative' }}>
-              <IconBell size={22} color="rgba(255,255,255,0.8)" />
-              <span style={{ position: 'absolute', top: '-4px', right: '-4px', width: '14px', height: '14px', background: '#EF4444', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '8px', color: '#fff', fontWeight: 500 }}>2</span>
-            </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <div
               style={{ width: '32px', height: '32px', borderRadius: '50%', background: 'rgba(255,255,255,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', fontWeight: 500, color: '#fff', cursor: 'pointer' }}
               onClick={() => user?.employeeId ? navigate(`/employee/${user.employeeId}`) : navigate('/eep/notifications')}
+              title="Mon profil"
             >
               {user?.initials ?? '?'}
             </div>
+            <div style={{ width: '1px', height: '18px', background: 'rgba(255,255,255,0.2)' }} />
+            <button
+              onClick={handleLogout}
+              title="Se déconnecter"
+              style={{ background: 'rgba(255,255,255,0.1)', border: 'none', borderRadius: '8px', width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
+            >
+              <IconLogout size={16} color="rgba(255,255,255,0.85)" />
+            </button>
           </div>
         </div>
 
@@ -125,9 +131,18 @@ export function EEPDashboard() {
         </div>
 
         {/* Bottom action */}
-        <div style={{ padding: '12px 16px 24px', background: COLORS.bg.page }}>
-          <button style={{ width: '100%', height: '52px', background: COLORS.brand.blue, color: '#fff', border: 'none', borderRadius: '12px', fontSize: '14px', fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit' }}>
-            Mettre à jour un ticket
+        <div style={{ padding: '12px 16px 24px', background: COLORS.bg.page, display: 'flex', gap: '8px' }}>
+          <button
+            onClick={() => navigate('/eep/notifications')}
+            style={{ width: '48px', height: '48px', background: COLORS.bg.surface, color: COLORS.text.secondary, border: `0.5px solid ${COLORS.border.default}`, borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', flexShrink: 0, position: 'relative' }}
+          >
+            <IconBell size={20} color={COLORS.brand.blue} />
+          </button>
+          <button
+            onClick={() => user?.employeeId ? navigate(`/employee/${user.employeeId}`) : undefined}
+            style={{ flex: 1, height: '48px', background: COLORS.brand.blue, color: '#fff', border: 'none', borderRadius: '12px', fontSize: '14px', fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit' }}
+          >
+            Mon profil
           </button>
         </div>
       </div>

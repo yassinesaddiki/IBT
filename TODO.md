@@ -7,6 +7,59 @@
 
 ---
 
+## ✅ DONE — Bugs session juin 2026 (Tâches H–J)
+
+### TÂCHE H — Profil employé s'affiche en layout mobile pour les utilisateurs desktop
+
+**Problème :** `EmployeeProfile.tsx` ligne 52 : `const isMobile = emp.role === 'eep' || emp.role === 'sed'`.
+Le layout (frame téléphone vs page desktop) est choisi selon le **rôle de l'employé consulté**, pas le **rôle du visiteur**. Quand un Coordinateur ou CGR clique sur un agent EP, il voit la page dans un faux cadre de téléphone, ce qui est incohérent.
+
+**Fix :** Utiliser le rôle du visiteur (`user?.role`) pour choisir le wrapper :
+```typescript
+const isMobile = user?.role === 'eep' || user?.role === 'sed'
+```
+
+**Fichier :** `src/features/shared/EmployeeProfile.tsx`
+
+---
+
+### TÂCHE I — Version mobile (EP/SED) : pas de déconnexion + pas de lien profil
+
+**Problème :** Sur `EEPDashboard.tsx` et `SEDDashboard.tsx`, le header mobile affiche le logo IBT + secteur d'un côté, et l'avatar + la cloche de l'autre. Il n'y a **aucun bouton de déconnexion** — l'utilisateur est bloqué sans possibilité de revenir au login. De plus, cliquer sur l'avatar navigue vers le profil mais le lien n'est pas évident.
+
+**Fix EEPDashboard header :**
+1. Supprimer l'icône cloche du header (la déplacer ou la retirer pour libérer de l'espace)
+2. Conserver le logo IBT (icône éclair + "IBT")
+3. Côté droit : avatar cliquable → profil, et bouton "Se déconnecter" (texte petit ou icône `IconLogout`)
+
+**Fix SEDDashboard header :** Même correction.
+
+**Note :** Il faut importer `useAuth` pour appeler `logout()` puis `navigate('/login')`.
+
+**Fichiers :** `src/features/eep/EEPDashboard.tsx`, `src/features/sed/SEDDashboard.tsx`
+
+---
+
+### TÂCHE J — Upload photo de profil employé (coordinateur + employé lui-même)
+
+**Problème :** Le champ `employees.avatar_url` existe en base et `EmployeeProfile.tsx` affiche déjà `emp.avatarUrl` si défini, mais il n'y a **aucune interface pour uploader une photo**. Ni dans la modale `EmployeeManagement` (coordinateur), ni dans la page `EmployeeProfile` quand c'est l'employé qui consulte son propre profil.
+
+**Fix — `EmployeeProfile.tsx` (auto-modification par l'employé) :**
+- Quand `isSelf === true` ou `isCoordinator === true`, afficher un bouton "Changer la photo" sur l'avatar
+- Clic → input `<file accept="image/*">` → upload via `useStorageUpload('employee-avatars')`
+- Path : `{employeeId}/avatar.jpg`
+- Après upload, appeler `updateEmployee(emp.id, { avatarUrl: publicUrl })` depuis `useEmployeeStore`
+- Remplacer les initiales par l'image si `avatarUrl` défini (déjà fait côté affichage)
+
+**Fix — `EmployeeManagement.tsx` (modale coordinateur) :**
+- Dans la modale d'ajout/modification, ajouter un bloc "Photo de profil" en haut du formulaire
+- Un cercle avec les initiales (ou la photo existante si edit) + bouton overlay "📷 Changer"
+- Même logique upload → `updateEmployee(id, { avatarUrl })` ou stocker l'URL dans le state local de la modale puis envoyer avec le reste du formulaire
+
+**Fichiers :** `src/features/shared/EmployeeProfile.tsx`, `src/features/coordinator/EmployeeManagement.tsx`
+
+---
+
 ## ✅ DONE — Travaux terminés
 
 ### Infrastructure & Architecture

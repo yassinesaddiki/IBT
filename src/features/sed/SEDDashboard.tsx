@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom'
-import { IconBolt, IconBell, IconAlertTriangle, IconChevronRight } from '@tabler/icons-react'
+import { IconBolt, IconBell, IconAlertTriangle, IconChevronRight, IconLogout } from '@tabler/icons-react'
 import { COLORS } from '../../design-system/tokens'
 import { useAuth } from '../../shared/hooks/useAuth'
 import { useTickets } from '../../shared/hooks/useTickets'
@@ -11,6 +11,7 @@ export function SEDDashboard() {
   const { user, logout } = useAuth()
   const { tickets }      = useTickets()
   const navigate         = useNavigate()
+  const handleLogout     = () => { logout(); navigate('/login') }
 
   const sedTickets = tickets.filter((t) =>
     t.status === 'approuve-sed' || t.status === 'en-cours-sed' ||
@@ -38,14 +39,22 @@ export function SEDDashboard() {
               <div style={{ color: 'rgba(255,255,255,0.6)', fontSize: '11px' }}>Service Exploitation & Distribution</div>
             </div>
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <div style={{ position: 'relative' }}>
-              <IconBell size={22} color="rgba(255,255,255,0.8)" />
-            </div>
-            <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: 'rgba(255,255,255,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', fontWeight: 500, color: '#fff', cursor: 'pointer' }}
-              onClick={logout}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <div
+              style={{ width: '32px', height: '32px', borderRadius: '50%', background: 'rgba(255,255,255,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', fontWeight: 500, color: '#fff', cursor: 'pointer' }}
+              onClick={() => user?.employeeId ? navigate(`/employee/${user.employeeId}`) : navigate('/sed/notifications')}
+              title="Mon profil"
+            >
               {user?.initials ?? '?'}
             </div>
+            <div style={{ width: '1px', height: '18px', background: 'rgba(255,255,255,0.2)' }} />
+            <button
+              onClick={handleLogout}
+              title="Se déconnecter"
+              style={{ background: 'rgba(255,255,255,0.1)', border: 'none', borderRadius: '8px', width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
+            >
+              <IconLogout size={16} color="rgba(255,255,255,0.85)" />
+            </button>
           </div>
         </div>
 
@@ -90,9 +99,18 @@ export function SEDDashboard() {
         </div>
 
         {/* Bottom action */}
-        <div style={{ padding: '12px 16px 24px', background: COLORS.bg.page }}>
-          <button style={{ width: '100%', height: '52px', background: COLORS.brand.blue, color: '#fff', border: 'none', borderRadius: '12px', fontSize: '14px', fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit' }}>
-            Mettre à jour le statut
+        <div style={{ padding: '12px 16px 24px', background: COLORS.bg.page, display: 'flex', gap: '8px' }}>
+          <button
+            onClick={() => navigate('/sed/notifications')}
+            style={{ width: '48px', height: '48px', background: COLORS.bg.surface, color: COLORS.text.secondary, border: `0.5px solid ${COLORS.border.default}`, borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', flexShrink: 0 }}
+          >
+            <IconBell size={20} color={COLORS.brand.blue} />
+          </button>
+          <button
+            onClick={() => user?.employeeId ? navigate(`/employee/${user.employeeId}`) : undefined}
+            style={{ flex: 1, height: '48px', background: COLORS.brand.blue, color: '#fff', border: 'none', borderRadius: '12px', fontSize: '14px', fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit' }}
+          >
+            Mon profil
           </button>
         </div>
       </div>

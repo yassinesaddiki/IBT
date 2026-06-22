@@ -174,8 +174,10 @@ export function DutyScheduleScreen() {
                       {/* Current agent preview */}
                       {currentEmp && (
                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
-                          <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: COLORS.semantic.info.bg, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px', fontWeight: 500, color: COLORS.semantic.info.text, flexShrink: 0 }}>
-                            {currentEmp.initials}
+                          <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: COLORS.semantic.info.bg, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px', fontWeight: 500, color: COLORS.semantic.info.text, flexShrink: 0, overflow: 'hidden' }}>
+                            {currentEmp.avatarUrl
+                              ? <img src={currentEmp.avatarUrl} alt={currentEmp.initials} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                              : currentEmp.initials}
                           </div>
                           <div style={{ flex: 1 }}>
                             <EmployeeChip empId={currentEmp.id} name={currentEmp.name} matricule={currentEmp.matricule} variant="block" />

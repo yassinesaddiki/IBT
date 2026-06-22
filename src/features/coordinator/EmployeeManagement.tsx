@@ -1,5 +1,6 @@
-import { useState } from 'react'
-import { IconPlus, IconPencil, IconSearch, IconUserCheck, IconUserX, IconX } from '@tabler/icons-react'
+import { useState, useRef } from 'react'
+import { IconPlus, IconPencil, IconSearch, IconUserCheck, IconUserX, IconX, IconCamera } from '@tabler/icons-react'
+import { useStorageUpload } from '../../shared/hooks/useStorageUpload'
 import { NavBar } from '../../shared/components/NavBar'
 import { SubNav } from '../../shared/components/SubNav'
 import { COLORS } from '../../design-system/tokens'
@@ -29,12 +30,14 @@ type FormData = {
   vehicleId:  string
   status:     'actif' | 'inactif'
   joinedDate: string
+  avatarUrl:  string
 }
 
 const EMPTY_FORM: FormData = {
   name: '', role: 'eep', sectorId: '', phone: '', email: '',
   matricule: '', vehicleId: '', status: 'actif',
   joinedDate: new Date().toISOString().slice(0, 10),
+  avatarUrl: '',
 }
 
 export function EmployeeManagement() {
@@ -50,6 +53,8 @@ export function EmployeeManagement() {
   const [form,       setForm]       = useState<FormData>(EMPTY_FORM)
   const [errors,     setErrors]     = useState<Record<string, string>>({})
   const [saving,     setSaving]     = useState(false)
+  const avatarInputRef = useRef<HTMLInputElement>(null)
+  const { upload: uploadAvatar, uploading: avatarUploading } = useStorageUpload('employee-avatars')
 
   const pendingApproval = tickets.filter((t) => t.status === 'attente-approbation').length
 
@@ -84,6 +89,7 @@ export function EmployeeManagement() {
       vehicleId:  emp.vehicleId ?? '',
       status:     emp.status,
       joinedDate: emp.joinedDate,
+      avatarUrl:  emp.avatarUrl ?? '',
     })
     setEditId(emp.id)
     setErrors({})
@@ -122,6 +128,7 @@ export function EmployeeManagement() {
         vehicleId:  form.vehicleId || undefined,
         status:     form.status,
         joinedDate: form.joinedDate,
+        avatarUrl:  form.avatarUrl || undefined,
       }
       if (editId) {
         await updateEmployee(editId, payload)
@@ -140,6 +147,13 @@ export function EmployeeManagement() {
   async function handleDelete(id: string) {
     if (!window.confirm('Supprimer cet employé ? Cette action est irréversible.')) return
     await removeEmployee(id)
+  }
+
+  async function handleAvatarPick(file: File) {
+    const tmpId = editId ?? `new-${Date.now()}`
+    const ext   = file.name.split('.').pop() ?? 'jpg'
+    const result = await uploadAvatar(file, `${tmpId}/avatar.${ext}`)
+    setForm((f) => ({ ...f, avatarUrl: result.publicUrl }))
   }
 
   const F = ({ label, name, required, children }: { label: string; name: string; required?: boolean; children: React.ReactNode }) => (
@@ -229,8 +243,11 @@ export function EmployeeManagement() {
                     <tr key={emp.id} style={{ borderBottom: `0.5px solid #F5F5F5` }}>
                       <td style={{ padding: '12px 14px' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                          <div style={{ width: '34px', height: '34px', borderRadius: '50%', background: COLORS.semantic.info.bg, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', fontWeight: 500, color: COLORS.semantic.info.text, flexShrink: 0 }}>
-                            {emp.initials}
+                          <div style={{ width: '34px', height: '34px', borderRadius: '50%', background: COLORS.semantic.info.bg, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', fontWeight: 500, color: COLORS.semantic.info.text, flexShrink: 0, overflow: 'hidden' }}>
+                            {emp.avatarUrl
+                              ? <img src={emp.avatarUrl} alt={emp.initials} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                              : emp.initials
+                            }
                           </div>
                           <div>
                             <div style={{ fontSize: '13px', fontWeight: 500, color: COLORS.text.primary }}>{emp.name}</div>
@@ -302,6 +319,30 @@ export function EmployeeManagement() {
                 {errors._server}
               </div>
             )}
+
+            {/* Avatar upload */}
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', marginBottom: '20px' }}>
+              <div
+                onClick={() => avatarInputRef.current?.click()}
+                style={{ width: '72px', height: '72px', borderRadius: '50%', overflow: 'hidden', border: `2px dashed ${COLORS.border.strong}`, background: COLORS.bg.panel, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', position: 'relative' }}
+              >
+                {form.avatarUrl
+                  ? <img src={form.avatarUrl} alt="avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  : <div style={{ fontSize: '20px', fontWeight: 500, color: COLORS.text.secondary }}>
+                      {form.name ? form.name.split(' ').map((p) => p[0]).join('').toUpperCase().slice(0, 2) : '?'}
+                    </div>
+                }
+                <div style={{ position: 'absolute', bottom: 0, right: 0, width: '22px', height: '22px', borderRadius: '50%', background: COLORS.brand.blue, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <IconCamera size={12} color="#fff" />
+                </div>
+              </div>
+              <button type="button" onClick={() => avatarInputRef.current?.click()} disabled={avatarUploading}
+                style={{ fontSize: '12px', color: COLORS.brand.blue, background: 'none', border: 'none', cursor: 'pointer', padding: 0, fontFamily: 'inherit' }}>
+                {avatarUploading ? 'Upload…' : 'Changer la photo'}
+              </button>
+              <input ref={avatarInputRef} type="file" accept="image/*" style={{ display: 'none' }}
+                onChange={(e) => { const f = e.target.files?.[0]; if (f) void handleAvatarPick(f) }} />
+            </div>
 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0 16px' }}>
               <div style={{ gridColumn: '1 / -1' }}>

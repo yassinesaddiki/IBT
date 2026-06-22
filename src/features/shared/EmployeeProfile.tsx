@@ -1,5 +1,6 @@
 import { useParams, useNavigate } from 'react-router-dom'
-import { IconArrowLeft, IconPencil, IconPhone, IconMail, IconCalendar, IconCar, IconTicket } from '@tabler/icons-react'
+import { useRef } from 'react'
+import { IconArrowLeft, IconPencil, IconPhone, IconMail, IconCalendar, IconCar, IconTicket, IconCamera } from '@tabler/icons-react'
 import { COLORS } from '../../design-system/tokens'
 import { useEmployee } from '../../shared/hooks/useEmployee'
 import { useAuthStore } from '../../store/authStore'
@@ -8,6 +9,8 @@ import { useTickets } from '../../shared/hooks/useTickets'
 import { ROLE_LABELS_FR } from '../../mock-data/employees'
 import { StatusBadge, SeverityBadge } from '../../design-system/components/Badge'
 import { formatElapsed } from '../../shared/utils/formatDate'
+import { useStorageUpload } from '../../shared/hooks/useStorageUpload'
+import { useEmployeeStore } from '../../store/employeeStore'
 
 export function EmployeeProfile() {
   const { id }      = useParams<{ id: string }>()
@@ -16,6 +19,9 @@ export function EmployeeProfile() {
   const user        = useAuthStore((s) => s.user)
   const accounts    = useAccountStore((s) => s.accounts)
   const { tickets } = useTickets()
+  const updateEmployee = useEmployeeStore((s) => s.updateEmployee)
+  const avatarInputRef = useRef<HTMLInputElement>(null)
+  const { upload: uploadAvatar, uploading: avatarUploading } = useStorageUpload('employee-avatars')
 
   if (!emp) {
     return (
@@ -49,7 +55,14 @@ export function EmployeeProfile() {
     )
   }).length
 
-  const isMobile = emp.role === 'eep' || emp.role === 'sed'
+  async function handleAvatarUpload(file: File) {
+    if (!emp) return
+    const ext  = file.name.split('.').pop() ?? 'jpg'
+    const result = await uploadAvatar(file, `${emp.id}/avatar.${ext}`)
+    await updateEmployee(emp.id, { avatarUrl: result.publicUrl })
+  }
+
+  const isMobile = user?.role === 'eep' || user?.role === 'sed'
 
   const roleColor = {
     eep:         { bg: COLORS.severity.moyenne.bg, text: COLORS.severity.moyenne.text, border: COLORS.severity.moyenne.border },
@@ -84,11 +97,21 @@ export function EmployeeProfile() {
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
           {/* Avatar */}
-          <div style={{ width: '64px', height: '64px', borderRadius: '50%', flexShrink: 0, overflow: 'hidden', border: '2.5px solid rgba(255,255,255,0.3)', background: 'rgba(255,255,255,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '22px', fontWeight: 500, color: '#fff' }}>
+          <div
+            onClick={() => canEdit && avatarInputRef.current?.click()}
+            style={{ width: '64px', height: '64px', borderRadius: '50%', flexShrink: 0, overflow: 'hidden', border: '2.5px solid rgba(255,255,255,0.3)', background: 'rgba(255,255,255,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '22px', fontWeight: 500, color: '#fff', cursor: canEdit ? 'pointer' : 'default', position: 'relative' }}
+          >
             {emp.avatarUrl
               ? <img src={emp.avatarUrl} alt={emp.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
               : emp.initials
             }
+            {canEdit && (
+              <div style={{ position: 'absolute', bottom: 0, right: 0, width: '20px', height: '20px', borderRadius: '50%', background: COLORS.brand.green, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                {avatarUploading ? <span style={{ fontSize: '8px', color: '#fff' }}>…</span> : <IconCamera size={11} color="#fff" />}
+              </div>
+            )}
+            <input ref={avatarInputRef} type="file" accept="image/*" style={{ display: 'none' }}
+              onChange={(e) => { const f = e.target.files?.[0]; if (f) void handleAvatarUpload(f) }} />
           </div>
 
           <div style={{ flex: 1 }}>

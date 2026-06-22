@@ -113,8 +113,10 @@ export function ObserverDutySchedule() {
               {sd.agents.length === 0 && <div style={{ fontSize: '12px', color: COLORS.text.muted, fontStyle: 'italic' }}>Aucun agent assigné cette semaine</div>}
               {sd.agents.map(({ employee: emp }) => (
                 <div key={emp.id} style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '10px', background: COLORS.bg.page, borderRadius: '10px', marginBottom: '10px' }}>
-                  <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: COLORS.semantic.info.bg, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', fontWeight: 500, color: COLORS.semantic.info.text, flexShrink: 0 }}>
-                    {emp.initials}
+                  <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: COLORS.semantic.info.bg, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', fontWeight: 500, color: COLORS.semantic.info.text, flexShrink: 0, overflow: 'hidden' }}>
+                    {emp.avatarUrl
+                      ? <img src={emp.avatarUrl} alt={emp.initials} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                      : emp.initials}
                   </div>
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <EmployeeChip empId={emp.id} name={emp.name} matricule={emp.matricule} variant="block" />
@@ -151,8 +153,10 @@ export function ObserverDutySchedule() {
                   <tr key={`${emp.id}-${slotIndex}`} style={{ borderBottom: `0.5px solid #F5F5F5` }}>
                     <td style={{ padding: '12px 14px' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: COLORS.semantic.info.bg, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '11px', fontWeight: 500, color: COLORS.semantic.info.text, flexShrink: 0 }}>
-                          {emp.initials}
+                        <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: COLORS.semantic.info.bg, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '11px', fontWeight: 500, color: COLORS.semantic.info.text, flexShrink: 0, overflow: 'hidden' }}>
+                          {emp.avatarUrl
+                            ? <img src={emp.avatarUrl} alt={emp.initials} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                            : emp.initials}
                         </div>
                         <EmployeeChip empId={emp.id} name={emp.name} matricule={emp.matricule} variant="block" />
                       </div>

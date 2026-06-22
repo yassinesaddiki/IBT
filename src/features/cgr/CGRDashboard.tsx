@@ -277,8 +277,10 @@ export function CGRDashboard() {
                   )}
                   {sd.agents.map(({ employee: emp }) => (
                     <div key={emp.id} style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '8px', background: COLORS.bg.panel, borderRadius: '8px', marginBottom: '6px' }}>
-                      <div style={{ width: '30px', height: '30px', borderRadius: '50%', background: COLORS.semantic.info.bg, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '11px', fontWeight: 500, color: COLORS.semantic.info.text, flexShrink: 0 }}>
-                        {emp.initials}
+                      <div style={{ width: '30px', height: '30px', borderRadius: '50%', background: COLORS.semantic.info.bg, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '11px', fontWeight: 500, color: COLORS.semantic.info.text, flexShrink: 0, overflow: 'hidden' }}>
+                        {emp.avatarUrl
+                          ? <img src={emp.avatarUrl} alt={emp.initials} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                          : emp.initials}
                       </div>
                       <div style={{ flex: 1, minWidth: 0 }}>
                         <EmployeeChip empId={emp.id} name={emp.name} matricule={emp.matricule} variant="block" />
